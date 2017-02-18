@@ -1,0 +1,17 @@
+{
+  "pg": {
+    "host": "localhost",
+    "port": 5432,
+    "user": "postgres",
+    "password": "postgres",
+    "database": "robots",
+    "dialect": "postgres"
+  },
+  "influx": {
+    "host": "localhost",
+    "port": 8086,
+    "username": "root",
+    "password": "root",
+    "database": "robots"
+  }
+}

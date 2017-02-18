@@ -1,0 +1,29 @@
+{
+  "name": "robots-reader-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "first-line": "^1.0.2",
+    "glob": "^7.1.1",
+    "influx": "^5.0.4",
+    "last-line": "0.0.3",
+    "line-by-line": "^0.1.5",
+    "lodash": "^4.17.4",
+    "moment": "^2.17.1",
+    "pg": "^6.1.2",
+    "pg-promise": "^5.5.7",
+    "promise": "^7.1.1",
+    "rmdir": "^1.2.0",
+    "scp2": "^0.5.0",
+    "sequelize": "^3.30.2",
+    "stream-json": "^0.4.2"
+  }
+}
