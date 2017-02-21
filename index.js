@@ -3,16 +3,8 @@
 const program = require('commander');
 require('colors');
 
-const Reader = require('./Reader.js');
+const RobotsReader = require('./RobotsReader.js');
 const pkg = require('./package.json');
-
-function wrap(cb) {
-    Reader.init()
-        .then(cb)
-        .catch((err) => {
-            console.error(err);
-        });
-}
 
 program
     .version(pkg.version);
@@ -23,14 +15,15 @@ program
     .action(() => {
         console.log('Robots disponibles :'.green.bold);
 
-        wrap(() => {
-            return Reader.listRobots()
-                .then((robots) => {
-                    robots.forEach((robot) => {
-                        console.log(`    ${robot.id}`.red + `: ${robot.host || ''}${robot.dir || ''}`);
-                    });
+        RobotsReader.listRobots()
+            .then((robots) => {
+                robots.forEach((robot) => {
+                    console.log(`    ${robot.id}`.red + `: ${robot.host || ''}${robot.dir || ''}`);
                 });
-        });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     });
 
 program
@@ -39,17 +32,15 @@ program
     .action((robot) => {
         console.log(('Executions disponibles pour ' + robot.red + ' :').green.bold);
 
-        wrap(() => {
-            return Reader.getRobot(robot)
-                .then((robot) => {
-                    return Reader.listExec(robot);
-                })
-                .then((execs) => {
-                    execs.forEach((exec) => {
-                        console.log(`    ${exec}`.blue);
-                    });
+        RobotsReader.listRemoteExecs(robot)
+            .then((execs) => {
+                execs.forEach((exec) => {
+                    console.log(`    ${exec}`.blue);
                 });
-        });
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     });
 
 program
@@ -58,12 +49,10 @@ program
     .action((robot, exec) => {
         console.log(('Sauvegarde l\'execution ' + exec.blue + ' du robot '.green + robot.red).green.bold);
 
-        wrap(() => {
-            return Reader.getRobot(robot)
-                .then((robot) => {
-                    return Reader.saveExec(robot, exec);
-                });
-        });
+        RobotsReader.saveExec(robot, exec)
+            .catch((err) => {
+                console.error(err);
+            });
     });
 
 program.parse(process.argv);
