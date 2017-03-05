@@ -7,6 +7,7 @@ const scp = Promise.denodeify(require('scp2').scp);
 const rmdir = Promise.denodeify(require('rmdir'));
 
 const conf = require('./conf.json');
+process.env.conf = JSON.stringify(conf);
 
 const postgres = require('./lib/DbPostgres.js');
 const influx = require('./lib/DbInflux.js');
@@ -19,7 +20,7 @@ const TimeseriesReader = require('./lib/TimeseriesReader.js');
  * @returns {Promise.<Object[]>}
  */
 function listRobots() {
-    return postgres.any(`SELECT * FROM robots.robots`);
+    return postgres.pg.any(`SELECT * FROM robots.robots`);
 }
 
 /**
@@ -28,7 +29,7 @@ function listRobots() {
  * @returns {Promise.<Object>}
  */
 function getRobot(idRobot) {
-    return postgres.oneOrNone('SELECT * FROM robots.robots WHERE id = $1', [idRobot]);
+    return postgres.pg.oneOrNone('SELECT * FROM robots.robots WHERE id = $1', [idRobot]);
 }
 
 /**
@@ -37,7 +38,7 @@ function getRobot(idRobot) {
  * @returns {Promise.<Object>}
  */
 function getExec(idExec) {
-    return postgres.oneOrNone(`SELECT * FROM robots.execs WHERE id = $1`, [idExec]);
+    return postgres.pg.oneOrNone(`SELECT * FROM robots.execs WHERE id = $1`, [idExec]);
 }
 
 /**
@@ -163,7 +164,7 @@ function insertLogs(robot, exec) {
 
         const query = pgp.helpers.insert(items, logsColumns);
 
-        postgres.none(query)
+        postgres.pg.none(query)
             .then(() => {
                 stream && stream.resume();
             })
@@ -182,7 +183,7 @@ function insertLogs(robot, exec) {
  * @returns {Promise.<object>}
  */
 function insertExec(idExec, robot, dates) {
-    return postgres.none(`INSERT INTO robots.execs(id, idrobot, datestart, dateend) VALUES($1, $2, $3, $4)`, [
+    return postgres.pg.none(`INSERT INTO robots.execs(id, idrobot, datestart, dateend) VALUES($1, $2, $3, $4)`, [
         idExec,
         robot.id,
         dates.start.toDate(),
