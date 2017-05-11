@@ -18,7 +18,10 @@ program
         RobotsReader.listRobots()
             .then((robots) => {
                 robots.forEach((robot) => {
-                    console.log(`    ${robot.id}`.red + `: ${robot.host || ''}${robot.dir || ''}`);
+                    console.log(` * ` + `${robot.name}`.blue + ` :`);
+                    console.log(`    -> Id        : ` + `${robot.id}`.red);
+                    console.log(`    -> Host      : ` + `${robot.host || 'empty'}`.red);
+                    console.log(`    -> Directory : ` + `${robot.dir || 'empty'}`.red);
                 });
             })
             .catch((err) => {
