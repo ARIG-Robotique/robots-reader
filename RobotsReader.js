@@ -98,18 +98,27 @@ function saveExec(idRobot, idExec) {
 
             return LogReader.getStartEnd(robot, idExec)
                 .then((dates) => {
-                    return insertExec(idExec, robot, dates);
+                    return Promise.all([
+                        robot,
+                        insertExec(idExec, robot, dates)
+                    ]);
                 });
         })
-        .then((exec) => {
+        .then((result) => {
+            const [robot, exec] = result;
+
             return insertTimeseries(robot, exec)
-                .then(() => exec);
+                .then(() => result);
         })
-        .then((exec) => {
+        .then((result) => {
+            const [robot, exec] = result;
+
             return insertLogs(robot, exec)
-                .then(() => exec);
+                .then(() => result);
         })
-        .then((exec) => {
+        .then((result) => {
+            const [robot, exec] = result;
+
             console.log('end', exec);
         });
 }
@@ -121,28 +130,31 @@ function saveExec(idRobot, idExec) {
  * @returns {Promise}
  */
 function insertTimeseries(robot, exec) {
-    return TimeseriesReader.readTimeseriesBatch(robot, exec.id, (items, stream) => {
-        stream && stream.pause();
+    return influx.init()
+        .then(() => {
+            TimeseriesReader.readTimeseriesBatch(robot, exec.id, (items, stream) => {
+                stream && stream.pause();
 
-        influx.writePoints(items.map((item) => {
-            return {
-                measurement: item.tableName,
-                timestamp  : item.time,
-                tags       : {idexec: exec.id},
-                fields     : item.fields
-            };
-        }), {
-            database : conf.influx.database,
-            precision: 'ms'
-        })
-            .then(() => {
-                stream && stream.resume();
+                influx.writePoints(items.map((item) => {
+                    return {
+                        measurement: item.tableName,
+                        timestamp  : item.time,
+                        tags       : {idexec: exec.id},
+                        fields     : item.fields
+                    };
+                }), {
+                    database : conf.influx.database,
+                    precision: 'ms'
+                })
+                    .then(() => {
+                        stream && stream.resume();
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        stream && stream.destroy();
+                    });
             })
-            .catch((err) => {
-                console.error(err);
-                stream && stream.destroy();
-            });
-    });
+        });
 }
 
 /**
@@ -162,7 +174,7 @@ function insertLogs(robot, exec) {
     return LogReader.readLogBatch(robot, exec.id, (items, stream) => {
         stream && stream.pause();
 
-        const query = pgp.helpers.insert(items, logsColumns);
+        const query = postgres.helpers.insert(items, logsColumns);
 
         postgres.pg.none(query)
             .then(() => {

@@ -23,9 +23,12 @@ program
                     console.log(`    -> Host      : ` + `${robot.host || 'empty'}`.red);
                     console.log(`    -> Directory : ` + `${robot.dir || 'empty'}`.red);
                 });
+
+                process.exit(0);
             })
             .catch((err) => {
                 console.error(err);
+                process.exit(1);
             });
     });
 
@@ -40,9 +43,12 @@ program
                 execs.forEach((exec) => {
                     console.log(`    ${exec}`.blue);
                 });
+
+                process.exit(0);
             })
             .catch((err) => {
                 console.error(err);
+                process.exit(1);
             });
     });
 
@@ -53,8 +59,12 @@ program
         console.log(('Sauvegarde l\'execution ' + exec.blue + ' du robot '.green + robot.red).green.bold);
 
         RobotsReader.saveExec(robot, exec)
+            .then(() => {
+                process.exit(0);
+            })
             .catch((err) => {
                 console.error(err);
+                process.exit(1);
             });
     });
 
