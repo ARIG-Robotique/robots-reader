@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const _ = require('lodash');
 const Promise = require('promise');
 const glob = Promise.denodeify(require('glob'));
 const scp = Promise.denodeify(require('scp2').scp);
@@ -139,7 +140,7 @@ function insertTimeseries(robot, exec) {
                     return {
                         measurement: item.tableName,
                         timestamp  : item.time,
-                        tags       : {idexec: exec.id},
+                        tags       : _.extend({idexec: exec.id, robot: robot.name}, item.tags),
                         fields     : item.fields
                     };
                 }), {
