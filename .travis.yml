@@ -1,4 +1,5 @@
 language: node_js
+sudo: required
 
 node_js:
   - "6.9"
@@ -8,10 +9,14 @@ addons:
 
 services:
   - postgresql
+  - docker
 
 before_script:
   - psql -c "CREATE ROLE arig LOGIN ENCRYPTED PASSWORD 'md5ebbc2a4c2462fcf3614c4c4d85afa9f3' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;" -U postgres
   - psql -c "CREATE DATABASE robots WITH OWNER = arig;" -U postgres
+  - docker pull influxdb:1.3-alpine
+  - docker run -d -p 8086:8086 influxdb:1.3-alpine
+  - npm install -g influxdb-cli
 
 script:
   - npm run migratedb
