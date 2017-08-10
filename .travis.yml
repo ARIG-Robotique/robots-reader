@@ -1,6 +1,9 @@
 language: node_js
 sudo: required
 
+env:
+  - INFLUXDB_DOCKER_IMAGE="influxdb:1.3-alpine"
+
 node_js:
   - "6.9"
 
@@ -12,12 +15,23 @@ services:
   - docker
 
 before_script:
+  # Copie les scripts SQL de tests
+  - cp -vf flyway-*/sql-tests/* flyway-*/sql/
+
+  # Configuration de la BDD PostgreSQL
   - psql -c "CREATE ROLE arig LOGIN ENCRYPTED PASSWORD 'md5ebbc2a4c2462fcf3614c4c4d85afa9f3' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;" -U postgres
   - psql -c "CREATE DATABASE robots WITH OWNER = arig;" -U postgres
-  - docker pull influxdb:1.3-alpine
-  - docker run -d -p 8086:8086 influxdb:1.3-alpine
-  - npm install -g influxdb-cli
+
+  # Création et configuration d'un instance InfluxDB
+  - docker pull ${INFLUXDB_DOCKER_IMAGE}
+  - docker run -d -p 8086:8086 ${INFLUXDB_DOCKER_IMAGE}
+  - docker run --rm ${INFLUXDB_DOCKER_IMAGE} influx -command 'CREATE DATABASE robots'
+  - docker run --rm ${INFLUXDB_DOCKER_IMAGE} influx -command "CREATE USER arig WITH PASSWORD 'arig'"
+  - docker run --rm ${INFLUXDB_DOCKER_IMAGE} influx -command 'GRANT ALL ON robots TO arig'
+
 
 script:
   - npm run migratedb
   - node index.js robots
+  - node index.js execs -1
+  - node index.js save -1 12345
