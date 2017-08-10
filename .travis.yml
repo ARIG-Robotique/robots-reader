@@ -33,5 +33,5 @@ before_script:
 script:
   - npm run migratedb
   - node index.js robots
-  - node index.js execs -1
-  - node index.js save -1 12345
+  - node index.js execs 0
+  - node index.js save 0 12345
