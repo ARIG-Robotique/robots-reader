@@ -25,9 +25,9 @@ before_script:
   # Création et configuration d'un instance InfluxDB
   - docker pull ${INFLUXDB_DOCKER_IMAGE}
   - docker run -d -p 8086:8086 ${INFLUXDB_DOCKER_IMAGE}
-  - docker run --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'CREATE DATABASE robots'
-  - docker run --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute "CREATE USER arig WITH PASSWORD 'arig'"
-  - docker run --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'GRANT ALL ON robots TO arig'
+  - docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'CREATE DATABASE robots'
+  - docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute "CREATE USER arig WITH PASSWORD 'arig'"
+  - docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'GRANT ALL ON robots TO arig'
 
 
 script:
