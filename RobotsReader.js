@@ -138,7 +138,7 @@ function insertTimeseries(robot, exec) {
 
                 influx.writePoints(items.map((item) => {
                     return {
-                        measurement: item.tableName,
+                        measurement: item.measurementName,
                         timestamp  : item.time,
                         tags       : _.extend({idexec: exec.id, robot: robot.name}, item.tags),
                         fields     : item.fields
