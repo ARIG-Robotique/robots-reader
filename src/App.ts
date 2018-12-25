@@ -1,9 +1,9 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import {Sequelize} from 'sequelize-typescript';
-import {Routes} from './routes/robotRoutes';
+import {Routes} from './routes/Routes';
 
-class RobotApp {
+class App {
 
     public app: express.Application;
     public route: Routes;
@@ -44,4 +44,4 @@ class RobotApp {
     }
 }
 
-export default new RobotApp().app;
+export default new App().app;

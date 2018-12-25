@@ -1,4 +1,4 @@
-import {AutoIncrement, Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt} from 'sequelize-typescript';
+import {AutoIncrement, Column, CreatedAt, Model, PrimaryKey, Table, Unique, UpdatedAt} from 'sequelize-typescript';
 
 @Table
 export class Robot extends Model<Robot> {
@@ -6,12 +6,20 @@ export class Robot extends Model<Robot> {
     @AutoIncrement
     @Column
     id: number;
+
+    @Unique
     @Column
     host: string;
+
     @Column
     name: string;
+
+    @Column
+    dir: string;
+
     @CreatedAt
     creationDate: Date;
+
     @UpdatedAt
     updatedOn: Date;
 }

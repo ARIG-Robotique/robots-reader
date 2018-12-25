@@ -1,7 +1,7 @@
-import robotApp from './robotApp';
+import App from './App';
 
 const PORT = 4100;
 
-robotApp.listen(PORT, () => {
+App.listen(PORT, () => {
     console.log('Express server listening on port ' + PORT);
 });
