@@ -1,9 +1,10 @@
 import {Robot} from "../models/Robot";
-import {Execs} from "../models/Execs";
-import {ExecStateEnum} from "../enum/ExecState.enum";
+import {ExecsService} from "./ExecsService";
 
 export class Service {
+    private execsService: ExecsService;
     constructor() {
+        this.execsService = new ExecsService();
     }
 
     public save(robot: Robot) {
@@ -24,40 +25,5 @@ export class Service {
 
     public findById(id: number) {
         return Robot.findById(id);
-    }
-
-    public createExec(robotId: number, execs: Execs) {
-        return new Promise<any>((resolve, reject) => {
-            Robot.findById(robotId)
-                .then((robot: Robot) => {
-                    const execsModel = new Execs({
-                        robotId: robot.id,
-                        dateStart: execs.dateStart
-                    });
-
-                    resolve(execsModel.save());
-                }, () => reject())
-        });
-    }
-
-    public findExecById(id: number) {
-        return Execs.findById(id);
-    }
-
-    public updateExec(id, exec: Execs) {
-        return Execs.update({
-            dateEnd: exec.dateEnd,
-            state: ExecStateEnum.DONE
-        }, {where: {id: id}});
-    }
-
-    public endExec(execId: number, execToUpdate: Execs) {
-        return Promise.all([this.updateExec(execId, execToUpdate)])
-            .then((result) => {
-                return this.findExecById(execId);
-            })
-            .then(exec => {
-
-            })
     }
 }

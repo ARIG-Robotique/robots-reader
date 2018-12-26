@@ -1,12 +1,15 @@
 import {Service} from '../services/Service';
 import {Request, Response} from 'express';
 import {Robot} from "../models/Robot";
+import {ExecsService} from "../services/ExecsService";
 
 export class Controller {
     private robotService: Service;
+    private execsService: ExecsService;
 
     constructor() {
         this.robotService = new Service();
+        this.execsService = new ExecsService();
     }
 
     addRobot(req: Request, res: Response) {
@@ -51,8 +54,16 @@ export class Controller {
     createExec(req: Request, res: Response) {
         const execs = req.body;
         const id = req.params.id;
-        this.robotService.createExec(id, execs)
+        this.execsService.create(id, execs)
             .then(result => res.status(201).json(result),
                 (error) => res.status(500).json(error));
+    }
+
+    endExec(req: Request, res: Response) {
+        const id = req.params.id;
+        const exec = req.body;
+        this.execsService.endExec(id, exec)
+            .then(() => res.status(200),
+                () => res.status(500));
     }
 }

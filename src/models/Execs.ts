@@ -1,5 +1,5 @@
 import {
-    AutoIncrement,
+    AutoIncrement, BelongsTo,
     Column,
     CreatedAt,
     ForeignKey,
@@ -22,6 +22,9 @@ export class Execs extends Model<Execs> {
     @ForeignKey(() => Robot)
     @Column
     robotId: number;
+
+    @BelongsTo(() => Robot)
+    robot: Robot;
 
     @Column
     dateStart: Date;

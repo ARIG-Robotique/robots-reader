@@ -34,6 +34,11 @@ export class Routes {
                 return this.robotController.createExec(req, res);
             });
 
+        app.route('/execs/:id/end')
+            .post((req: Request, res: Response) => {
+                return this.robotController.end(req, res);
+            });
+
         app.route('/health')
             .get((req: Request, res: Response) => {
                 res.json({message: 'Hello world'});

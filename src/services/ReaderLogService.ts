@@ -2,6 +2,7 @@ import * as path from "path";
 import moment = require("moment");
 import Promise = require('promise');
 import LineByLine = require('line-by-line');
+import {Execs} from "../models/Execs";
 
 export class ReaderLogService {
 
@@ -110,15 +111,14 @@ export class ReaderLogService {
 
     /**
      * Lecture d'un fichier de log en batch de 20 lignes
-     * @param {object} robot
      * @param {string} exec
      * @param {function} onData appellée pour chaque groupe de 20 lignes de log
      * @returns {Promise}
      */
-    readLogBatch(robot, exec, onData) {
+    readLogBatch(robotDir, execName, onData) {
         let items = [];
 
-        return this.readLog(robot, exec, (item, stream) => {
+        return this.readLog(robotDir, execName, (item, stream) => {
             items.push(item);
 
             if (items.length >= 20) {
