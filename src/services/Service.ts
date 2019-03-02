@@ -1,10 +1,13 @@
 import {Robot} from "../models/Robot";
 import {ExecsService} from "./ExecsService";
+import {Inject} from "typescript-ioc";
 
 export class Service {
+    @Inject
     private execsService: ExecsService;
+
     constructor() {
-        this.execsService = new ExecsService();
+        // this.execsService = new ExecsService();
     }
 
     public save(robot: Robot) {
@@ -24,6 +27,6 @@ export class Service {
     }
 
     public findById(id: number) {
-        return Robot.findById(id);
+        return Robot.findByPrimary(id);
     }
 }

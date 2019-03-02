@@ -35,6 +35,7 @@
     "scp2": "^0.5.0",
     "sequelize": "^4.42.0",
     "sequelize-typescript": "^0.6.6",
-    "stream-json": "^0.4.2"
+    "stream-json": "^0.4.2",
+    "typescript-ioc": "^1.2.4"
   }
 }

@@ -17,6 +17,8 @@ export class Controller {
             host: req.body.host,
             name: req.body.name
         });
+        console.log('robot to be added',robot);
+
         console.log('this', this);
         this.robotService.save(robot).then((result) => {
             res.status(201).json(result);
@@ -51,19 +53,12 @@ export class Controller {
                 () => res.status(404));
     }
 
-    createExec(req: Request, res: Response) {
-        const execs = req.body;
-        const id = req.params.id;
-        this.execsService.create(id, execs)
-            .then(result => res.status(201).json(result),
+    readAnExec(req: Request, res: Response) {
+        const execs  = req.body;
+        const robotId = req.params.id;
+        console.log(`Read an execs for Robot ${robotId}`, execs);
+        this.execsService.loadLog(robotId, execs)
+            .then(result => res.status(200).json(result),
                 (error) => res.status(500).json(error));
-    }
-
-    endExec(req: Request, res: Response) {
-        const id = req.params.id;
-        const exec = req.body;
-        this.execsService.endExec(id, exec)
-            .then(() => res.status(200),
-                () => res.status(500));
     }
 }

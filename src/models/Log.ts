@@ -26,4 +26,7 @@ export class Log extends Model<Log> {
 
     @Column
     message: string;
+
+    @Column
+    idExec: string;
 }

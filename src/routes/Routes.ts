@@ -1,15 +1,17 @@
 import {Request, Response} from 'express';
-import {Controller} from '../controllers/Controller';
-import {Service} from '../services/Service';
+import {Inject} from "typescript-ioc";
+import {RobotsService} from "../../../robots-supervisor/src/app/services/robots.service";
+import {Controller} from "../controllers/Controller";
 
 export class Routes {
-
-    public robotService;
-    public robotController;
+    @Inject
+    public robotService : RobotsService;
+    @Inject
+    public robotController : Controller;
 
     constructor() {
-        this.robotService = new Service();
-        this.robotController = new Controller();
+        // this.robotService = new RobotsService();
+
     }
 
     routes(app) {
@@ -31,12 +33,7 @@ export class Routes {
 
         app.route('/robot/:id/execs')
             .post((req: Request, res: Response) => {
-                return this.robotController.createExec(req, res);
-            });
-
-        app.route('/execs/:id/end')
-            .post((req: Request, res: Response) => {
-                return this.robotController.end(req, res);
+                return this.robotController.readAnExec(req, res);
             });
 
         app.route('/health')

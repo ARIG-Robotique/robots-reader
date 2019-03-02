@@ -33,6 +33,9 @@ export class Execs extends Model<Execs> {
     dateEnd: Date;
 
     @Column
+    dir: string;
+
+    @Column
     state: ExecStateEnum;
 
     @CreatedAt

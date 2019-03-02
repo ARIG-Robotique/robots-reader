@@ -4,4 +4,6 @@ export class LogService {
     writeLogToPg() {
 
     }
+
+
 }

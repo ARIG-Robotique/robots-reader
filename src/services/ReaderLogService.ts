@@ -2,7 +2,6 @@ import * as path from "path";
 import moment = require("moment");
 import Promise = require('promise');
 import LineByLine = require('line-by-line');
-import {Execs} from "../models/Execs";
 
 export class ReaderLogService {
 
@@ -55,12 +54,12 @@ export class ReaderLogService {
      * @returns {Promise}
      */
     readLog(robot, exec, onData) {
+        console.log(`readlog ${robot} ${exec}`);
+        const tracesPath = path.join(robot, `${exec}-traces.log`);
+        console.log(`tracesPath ${tracesPath}`);
+        const stream = new LineByLine(tracesPath);
+        let current;
         return new Promise((resolve, reject) => {
-            const tracesPath = path.join(robot.dir, `${exec}-traces.log`);
-            const stream = new LineByLine(tracesPath);
-
-            let current;
-
             stream.on('line', (line) => {
                 // vérifie que la ligne commence par une date
                 if (line.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}/)) {
@@ -74,15 +73,15 @@ export class ReaderLogService {
                     current.message += '\n' + line;
                 }
             });
-
             stream.on('end', () => {
                 if (current) {
                     onData(current, stream);
                 }
+                console.log('readLog finished');
                 resolve();
             });
 
-            stream.on('error', reject);
+            stream.on('error', (error) => reject(error));
         });
     }
 
@@ -117,19 +116,19 @@ export class ReaderLogService {
      */
     readLogBatch(robotDir, execName, onData) {
         let items = [];
-
-        return this.readLog(robotDir, execName, (item, stream) => {
-            items.push(item);
-
-            if (items.length >= 20) {
-                onData(items.slice(0), stream);
-                items.length = 0;
-            }
-        })
-            .then(() => {
-                if (items.length > 0) {
-                    onData(items);
+        return new Promise((resolve, reject) => {
+            this.readLog(robotDir, execName, (item, stream) => {
+                console.log(`read log batch  ${JSON.stringify(item)}`);
+                items.push(item);
+                if (items.length >= 200) {
+                    onData(items.slice(0), stream);
+                    items.length = 0;
                 }
-            });
+            })
+                .then(result => {
+                    console.log('readLogBatch finished');
+                    resolve(result);
+                }, error => reject(error));
+        });
     }
 }
