@@ -32,7 +32,10 @@ class App {
             password: this.conf.pg.password,
             modelPaths: [
                 __dirname + '/models'
-            ]
+            ],
+            define: {
+                schema: 'robots'
+            }
         });
 
         this.sequelize.sync({force: false})

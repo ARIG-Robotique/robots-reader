@@ -1,14 +1,15 @@
-import {Execs} from "../models/Execs";
-import {Robot} from "../models/Robot";
-import {ExecStateEnum} from "../enum/ExecState.enum";
-import {ReaderLogService} from "./ReaderLogService";
-import {Service} from "./Service";
-import {Log} from "../models/Log";
-import {InfluxService} from "./InfluxService";
-import {InfluxDB} from "influx";
-import * as _ from "lodash";
-import {Inject} from "typescript-ioc";
-import {error} from "util";
+import {Execs} from '../models/Execs';
+import {Robot} from '../models/Robot';
+import {ExecStateEnum} from '../enum/ExecState.enum';
+import {ReaderLogService} from './ReaderLogService';
+import {Service} from './Service';
+import {Log} from '../models/Log';
+import {InfluxDB} from 'influx';
+import * as _ from 'lodash';
+import {Inject} from 'typescript-ioc';
+import {Mouvement} from '../models/Mouvement';
+import {MouvementData} from '../dto/MouvementData';
+import {ReadTimeSeriesService} from './ReadTimeSeriesService';
 
 export class ExecsService {
     private conf = require('../../conf.json');
@@ -20,7 +21,7 @@ export class ExecsService {
     @Inject
     private robotService: Service;
     @Inject
-    private influxService: InfluxService;
+    private influxService: ReadTimeSeriesService;
 
     constructor() {
         this.influxDbSetup();
@@ -63,9 +64,7 @@ export class ExecsService {
                 }
 
                 Promise.all(promises).then(() => {
-                    console.log('finish insert log');
                     stream && stream.resume();
-                    // resolve();
                 }, (err) => {
                     console.log(err);
                     stream && stream.destroy();
@@ -74,18 +73,61 @@ export class ExecsService {
             })
                 .then(result => {
                     console.log('finish insert log');
-                    // stream && stream.resume();
                     resolve();
                 });
         });
     }
 
-    public insertInflux(robot: Robot, exec: Execs) {
-        console.log(`Insert log to influx ${robot.id} and ${exec.dir}`);
+    private mouvementMapper(item, execId: number): Mouvement {
+        const mouvement = new Mouvement();
+        mouvement.execsId = execId;
+        mouvement.type = item.type;
+        mouvement.distance = item.distance;
+        const mouvementData = new MouvementData();
+
+        if (item.type === 'PATH') {
+            mouvementData.path = JSON.parse(JSON.stringify(item.path));
+        } else {
+            mouvementData.fromPoint = JSON.parse(JSON.stringify(item.fromPoint));
+            mouvementData.toPoint = JSON.parse(JSON.stringify(item.toPoint));
+        }
+
+        mouvement.data = mouvementData;
+        mouvement.time = new Date(item.time);
+
+
+        return mouvement;
+    }
+
+    public insertMouvementSeries(robot: Robot, exec: Execs) {
+        let promises = [];
+
+        return new Promise((resolve, reject) => {
+            this.influxService.readMouvementSeriesBatch(robot.dir, exec.dir, (items, stream) => {
+                stream && stream.pause();
+
+                for (let i = 0; i < items.length; i++) {
+                    promises.push(this.mouvementMapper(items[i], exec.id).save());
+                }
+
+                Promise.all(promises).then(() => {
+                    stream && stream.resume();
+                }, (err) => {
+                    console.log(err);
+                    stream && stream.destroy();
+                    reject(err);
+                });
+            })
+                .then((result) => resolve(result))
+                .catch((error) => reject(error));
+        });
+    }
+
+    public insertTimeSeries(robot: Robot, exec: Execs) {
+        console.log(`Insert log series into influx ${robot.id} and ${exec.dir}`);
         return new Promise((resolve, reject) => {
             this.influxService.readTimeseriesBatch(robot.dir, exec.dir, (items, stream) => {
                 stream && stream.pause();
-                console.log(`timeserie items ${JSON.stringify(items)}`);
 
                 this.influx.writePoints(items.map((item) => {
                     return {
@@ -130,11 +172,9 @@ export class ExecsService {
             this.create(robotId, execs)
                 .then((result) => {
                     const savedExecs = result[0];
-                    console.info(`Created an exec ${JSON.stringify(result)}`);
-                    Promise.all([this.insertLog(result[1].dir, savedExecs), this.insertInflux(result[1], savedExecs)])
+                    Promise.all([this.insertLog(result[1].dir, savedExecs), this.insertTimeSeries(result[1], savedExecs), this.insertMouvementSeries(result[1], savedExecs)])
                         .then(() => resolve())
                         .catch((err) => reject(err));
-
                 }, error => reject(error));
         });
     }

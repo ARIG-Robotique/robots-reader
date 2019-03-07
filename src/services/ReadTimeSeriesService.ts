@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const StreamArray = require('stream-json/utils/StreamArray');
 
-export class InfluxService {
+export class ReadTimeSeriesService {
     /**
      * Lecture d'un fichier timeseries en stream
      * @param {object} robot
@@ -11,9 +11,9 @@ export class InfluxService {
      * @param {function} onData appelé pour chaque objet du fichier
      * @returns {Promise}
      */
-    readTimeseries(dir, exec, onData) {
+    readTimeseries(dir, url, onData) {
         return new Promise((resolve) => {
-            const timeseriesPath = path.join(dir, `${exec}-timeseries.json`);
+            const timeseriesPath = path.join(dir, url);
             const stream = StreamArray.make();
             const fileStream = fs.createReadStream(timeseriesPath);
 
@@ -28,6 +28,17 @@ export class InfluxService {
     }
 
     /**
+     *
+     * @param dir
+     * @param exec
+     * @param onData
+     */
+    readMouvementSeriesBatch(dir, exec, onData) {
+        const url = `${exec}-mouvement.json`;
+        return this.readSeriesFile(dir, url, onData);
+    }
+
+    /**
      * Lecture d'un fichier timeseries en batch de 100 objets
      * @param {object} robot
      * @param {string} exec
@@ -35,10 +46,14 @@ export class InfluxService {
      * @returns {Promise}
      */
     readTimeseriesBatch(dir, exec, onData) {
-        let items = [];
+        const url = `${exec}-timeseries.json`;
+        return this.readSeriesFile(dir, url, onData);
+    }
 
+    readSeriesFile(dir, url, onData) {
+        let items = [];
         return new Promise((resolve, reject) => {
-            this.readTimeseries(dir, exec, (item, stream) => {
+            this.readTimeseries(dir, url, (item, stream) => {
                 items.push(item);
 
                 if (items.length >= 100) {
@@ -49,8 +64,8 @@ export class InfluxService {
                 .then(() => {
                     if (items.length > 0) {
                         onData(items);
-                        resolve();
                     }
+                    resolve();
                 }, error => reject(error));
         });
     }
