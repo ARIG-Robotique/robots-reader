@@ -1,5 +1,6 @@
 import {
-    AutoIncrement, BelongsTo,
+    AutoIncrement,
+    BelongsTo,
     Column,
     CreatedAt,
     ForeignKey,
@@ -10,7 +11,6 @@ import {
     UpdatedAt
 } from "sequelize-typescript";
 import {Robot} from "./Robot";
-import {ExecStateEnum} from "../enum/ExecState.enum";
 
 @Table
 export class Execs extends Model<Execs> {
@@ -32,8 +32,9 @@ export class Execs extends Model<Execs> {
     @Column
     dateEnd: Date;
 
+    @Unique
     @Column
-    dir: string;
+    numberExec: string;
 
     @CreatedAt
     creationDate: Date;

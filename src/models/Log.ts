@@ -1,4 +1,4 @@
-import {AutoIncrement, Column, ForeignKey, Model, PrimaryKey, Table} from "sequelize-typescript";
+import {AutoIncrement, Column, DataType, ForeignKey, Model, PrimaryKey, Table} from "sequelize-typescript";
 import {Execs} from "./Execs";
 
 @Table
@@ -24,7 +24,9 @@ export class Log extends Model<Log> {
     @Column
     clazz: string;
 
-    @Column
+    @Column({
+        type: DataType.TEXT
+    })
     message: string;
 
     @Column

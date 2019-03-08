@@ -34,14 +34,14 @@ export class Routes {
                 return this.robotController.getRobotFullInfos(req, res);
             });
 
-        app.route('/robot/:id/execs')
-            .post((req: Request, res: Response) => {
-                return this.robotController.readAnExec(req, res);
-            });
-
         app.route('/copyLogs')
             .get((req: Request, res: Response) => {
                 return this.robotController.copyAllLogs(req, res);
+            });
+
+        app.route('/robot/:id/importLogs')
+            .get((req: Request, res: Response) => {
+                return this.robotController.importLogs(req, res);
             });
 
         app.route('/health')

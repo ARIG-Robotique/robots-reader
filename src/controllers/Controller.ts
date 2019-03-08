@@ -47,36 +47,33 @@ export class Controller {
         this.robotService.findAll()
             .then((result) => {
                 res.status(200).json(result);
-            }, () => res.status(500));
+            }, () => res.sendStatus(500));
     }
 
     getRobot(req: Request, res: Response) {
         this.robotService.findById(req.params.id)
             .then(result => res.status(200).json(result),
-                () => res.status(404));
+                () => res.sendStatus(404));
     }
 
     getRobotFullInfos(req: Request, res: Response) {
         this.robotService.loadRobotFullInfos(req.params.id)
             .then(result => res.status(200).json(result),
-                () => res.status(500));
-    }
-
-    readAnExec(req: Request, res: Response) {
-        const execs = req.body;
-        const robotId = req.params.id;
-        console.log(`Read an execs for Robot ${robotId}`, execs);
-        this.execsService.loadLog(robotId, execs)
-            .then(result => res.status(200).json(result),
-                (error) => res.status(500).json(error));
+                () => res.sendStatus(500));
     }
 
     copyAllLogs(req: Request, res: Response) {
         const robotsId = req.query.ids;
 
         this.bashService.copyAllLog(!Array.isArray(robotsId) ? [robotsId] : robotsId)
-            .then(() => res.status(200),
-                () => res.status(500));
+            .then(() => res.sendStatus(200),
+                () => res.sendStatus(500));
+    }
 
+    importLogs(req: Request, res: Response) {
+        const robotId = req.params.id;
+        this.execsService.importLogsForRobot(robotId)
+            .then(() => res.sendStatus(200),
+                () => res.sendStatus(500));
     }
 }
