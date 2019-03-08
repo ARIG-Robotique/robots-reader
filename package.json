@@ -19,6 +19,7 @@
     "body-parser": "^1.18.3",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "first-line": "^1.0.3",
     "glob": "^7.1.1",
@@ -37,5 +38,8 @@
     "sequelize-typescript": "^0.6.6",
     "stream-json": "^0.4.2",
     "typescript-ioc": "^1.2.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.4"
   }
 }
