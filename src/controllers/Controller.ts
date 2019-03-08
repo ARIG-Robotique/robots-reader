@@ -2,14 +2,17 @@ import {Service} from '../services/Service';
 import {Request, Response} from 'express';
 import {Robot} from "../models/Robot";
 import {ExecsService} from "../services/ExecsService";
+import {BashService} from "../services/BashService";
 
 export class Controller {
     private robotService: Service;
     private execsService: ExecsService;
+    private bashService: BashService;
 
     constructor() {
         this.robotService = new Service();
         this.execsService = new ExecsService();
+        this.bashService = new BashService();
     }
 
     addRobot(req: Request, res: Response) {
@@ -17,7 +20,7 @@ export class Controller {
             host: req.body.host,
             name: req.body.name
         });
-        console.log('robot to be added',robot);
+        console.log('robot to be added', robot);
 
         console.log('this', this);
         this.robotService.save(robot).then((result) => {
@@ -60,11 +63,20 @@ export class Controller {
     }
 
     readAnExec(req: Request, res: Response) {
-        const execs  = req.body;
+        const execs = req.body;
         const robotId = req.params.id;
         console.log(`Read an execs for Robot ${robotId}`, execs);
         this.execsService.loadLog(robotId, execs)
             .then(result => res.status(200).json(result),
                 (error) => res.status(500).json(error));
+    }
+
+    copyAllLogs(req: Request, res: Response) {
+        const robotsId = req.query.ids;
+
+        this.bashService.copyAllLog(!Array.isArray(robotsId) ? [robotsId] : robotsId)
+            .then(() => res.status(200),
+                () => res.status(500));
+
     }
 }

@@ -5,13 +5,11 @@ import {Controller} from "../controllers/Controller";
 
 export class Routes {
     @Inject
-    public robotService : RobotsService;
+    public robotService: RobotsService;
     @Inject
-    public robotController : Controller;
+    public robotController: Controller;
 
     constructor() {
-        // this.robotService = new RobotsService();
-
     }
 
     routes(app) {
@@ -39,6 +37,11 @@ export class Routes {
         app.route('/robot/:id/execs')
             .post((req: Request, res: Response) => {
                 return this.robotController.readAnExec(req, res);
+            });
+
+        app.route('/copyLogs')
+            .get((req: Request, res: Response) => {
+                return this.robotController.copyAllLogs(req, res);
             });
 
         app.route('/health')
