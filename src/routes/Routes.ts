@@ -31,6 +31,11 @@ export class Routes {
                 return this.robotController.getRobot(req, res);
             });
 
+        app.route('/robot/:id/full')
+            .get((req: Request, res: Response) => {
+                return this.robotController.getRobotFullInfos(req, res);
+            });
+
         app.route('/robot/:id/execs')
             .post((req: Request, res: Response) => {
                 return this.robotController.readAnExec(req, res);

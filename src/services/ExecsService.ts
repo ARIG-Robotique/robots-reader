@@ -10,6 +10,7 @@ import {Inject} from 'typescript-ioc';
 import {Mouvement} from '../models/Mouvement';
 import {MouvementData} from '../dto/MouvementData';
 import {ReadTimeSeriesService} from './ReadTimeSeriesService';
+import {ExecsDTO} from "../dto/ExecsDTO";
 
 export class ExecsService {
     private conf = require('../../conf.json');
@@ -31,19 +32,33 @@ export class ExecsService {
         return new Promise<any>((resolve, reject) => {
             Robot.findById(robotId)
                 .then((robot: Robot) => {
-                    const execsModel = new Execs({
-                        robotId: robot.id,
-                        dateStart: execs.dateStart,
-                        dir: execs.dir
-                    });
-                    console.log('save exec');
-                    execsModel.save().then(savedExecs => resolve([savedExecs, robot]));
+                    this.readerLogService.getStartEnd(robot.dir, execs.dir)
+                        .then(dates => {
+                            const execsModel = new Execs({
+                                robotId: robot.id,
+                                dir: execs.dir,
+                                dateStart: dates.start,
+                                dateEnd: dates.end
+                            });
+                            console.log('save exec');
+                            execsModel.save().then(savedExecs => resolve([savedExecs, robot]));
+                        }, (err) => reject(err));
                 }, (error) => reject(error))
         });
     }
 
     public findById(id: number) {
         return Execs.findById(id, {include: [Robot]});
+    }
+
+    public findAllExecsByRobotId(robotId: number) {
+        return Execs.findAll({
+            where: {
+                robotId: robotId
+            }
+        }).then((execs: Execs[]) => {
+            return execs.map(exec => new ExecsDTO(exec));
+        });
     }
 
     public update(id, exec: Execs) {

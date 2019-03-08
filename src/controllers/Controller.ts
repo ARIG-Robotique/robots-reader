@@ -53,6 +53,12 @@ export class Controller {
                 () => res.status(404));
     }
 
+    getRobotFullInfos(req: Request, res: Response) {
+        this.robotService.loadRobotFullInfos(req.params.id)
+            .then(result => res.status(200).json(result),
+                () => res.status(500));
+    }
+
     readAnExec(req: Request, res: Response) {
         const execs  = req.body;
         const robotId = req.params.id;

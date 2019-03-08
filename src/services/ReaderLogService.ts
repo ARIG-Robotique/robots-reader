@@ -14,8 +14,8 @@ export class ReaderLogService {
      * @param {String} exec
      * @returns {Promise.<Object>}
      */
-    getStartEnd(robot, exec) {
-        const tracesPath = path.join(robot.dir, `${exec}-traces.log`);
+    getStartEnd(robotDir: string, execNum: string) {
+        const tracesPath = path.join(robotDir, `${execNum}-traces.log`);
 
         return Promise.all([
             this.firstLine(tracesPath),
@@ -42,20 +42,20 @@ export class ReaderLogService {
      * @param {string} content
      * @returns {moment}
      */
-    parseLineDate(content) {
+    private parseLineDate(content) {
         return moment(new Date(content.slice(0, 19)));
     }
 
     /**
      * Lecture d'un fichier de log en stream
-     * @param {object} robot
-     * @param {string} exec
+     * @param {object} robotDir
+     * @param {string} execNum
      * @param {function} onData appellée pour chaque ligne de log
      * @returns {Promise}
      */
-    readLog(robot, exec, onData) {
-        console.log(`readlog ${robot} ${exec}`);
-        const tracesPath = path.join(robot, `${exec}-traces.log`);
+    readLog(robotDir: string, execNum: string, onData) {
+        console.log(`readlog ${robotDir} ${execNum}`);
+        const tracesPath = path.join(robotDir, `${execNum}-traces.log`);
         console.log(`tracesPath ${tracesPath}`);
         const stream = new LineByLine(tracesPath);
         let current;
@@ -67,7 +67,7 @@ export class ReaderLogService {
                         onData(current, stream);
                     }
                     current = this.parseLog(line);
-                    current.idexec = exec;
+                    current.idexec = execNum;
                 }
                 else if (current) {
                     current.message += '\n' + line;
