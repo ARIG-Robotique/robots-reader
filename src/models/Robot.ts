@@ -17,6 +17,9 @@ export class Robot extends Model<Robot> {
     @Column
     dir: string;
 
+    @Column
+    simulateur: boolean;
+
     @CreatedAt
     creationDate: Date;
 

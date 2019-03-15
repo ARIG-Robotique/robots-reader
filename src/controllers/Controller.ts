@@ -18,7 +18,9 @@ export class Controller {
     addRobot(req: Request, res: Response) {
         let robot = new Robot({
             host: req.body.host,
-            name: req.body.name
+            name: req.body.name,
+            dir: req.body.dir,
+            simulateur: req.body.simulateur
         });
         console.log('robot to be added', robot);
 
@@ -75,5 +77,19 @@ export class Controller {
         this.execsService.importLogsForRobot(robotId)
             .then(() => res.sendStatus(200),
                 () => res.sendStatus(500));
+    }
+
+    deleteRobotExec(req: Request, res: Response) {
+        const execId = req.params.id;
+        this.execsService.delete(execId)
+            .then(() => res.sendStatus(200),
+                (error) => res.json(error).sendStatus(500))
+    }
+
+    deleteRobot(req: Request, res: Response) {
+        const robotId = req.params.id;
+        this.robotService.delete(robotId)
+            .then(() => res.sendStatus(200),
+                (err) => res.json(err).sendStatus(500));
     }
 }

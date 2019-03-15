@@ -9,7 +9,6 @@ import {Inject} from 'typescript-ioc';
 import {Mouvement} from '../models/Mouvement';
 import {MouvementData} from '../dto/MouvementData';
 import {ReadTimeSeriesService} from './ReadTimeSeriesService';
-import {ExecsDTO} from "../dto/ExecsDTO";
 
 const fs = require('fs');
 
@@ -39,9 +38,33 @@ export class ExecsService {
                         dateStart: dates.start,
                         dateEnd: dates.end
                     });
-                    console.log('save exec');
                     execsModel.save().then(savedExecs => resolve([savedExecs, robot]));
                 }, (err) => reject(err));
+        });
+    }
+
+    public delete(idExec: number) {
+
+        return Promise.all([Execs.findByPrimary(idExec), this.getMouvementByExecsId(idExec)])
+            .then(result => {
+                const exec: Execs = result[0];
+                const mouvements: Mouvement[] = result[1];
+
+                var promises = [];
+                mouvements.forEach(mouvement => promises.push(mouvement.destroy()));
+
+                return Promise.all(promises)
+                    .then(result => {
+                        return exec.destroy();
+                    });
+            });
+    }
+
+    private getMouvementByExecsId(idExec: number) {
+        return Mouvement.findAll({
+            where: {
+                execsId: idExec
+            }
         });
     }
 
@@ -50,8 +73,6 @@ export class ExecsService {
             where: {
                 robotId: robotId
             }
-        }).then((execs: Execs[]) => {
-            return execs.map(exec => new ExecsDTO(exec));
         });
     }
 

@@ -27,6 +27,9 @@ export class Routes {
             })
             .get((req: Request, res: Response) => {
                 return this.robotController.getRobot(req, res);
+            })
+            .delete((req: Request, res: Response) => {
+                return this.robotController.deleteRobot(req, res);
             });
 
         app.route('/robot/:id/full')
@@ -37,6 +40,11 @@ export class Routes {
         app.route('/copyLogs')
             .get((req: Request, res: Response) => {
                 return this.robotController.copyAllLogs(req, res);
+            });
+
+        app.route('/exec/:id')
+            .delete((req: Request, res: Response) => {
+                return this.robotController.deleteRobotExec(req, res);
             });
 
         app.route('/robot/:id/importLogs')
