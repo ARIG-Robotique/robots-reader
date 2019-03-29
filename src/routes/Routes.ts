@@ -37,7 +37,7 @@ export class Routes {
                 return this.robotController.getRobotFullInfos(req, res);
             });
 
-        app.route('/copyLogs')
+        app.route('/robot/:id/copyLogs')
             .get((req: Request, res: Response) => {
                 return this.robotController.copyAllLogs(req, res);
             });

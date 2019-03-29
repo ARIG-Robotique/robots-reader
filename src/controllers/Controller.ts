@@ -65,7 +65,7 @@ export class Controller {
     }
 
     copyAllLogs(req: Request, res: Response) {
-        const robotsId = req.query.ids;
+        const robotsId = req.params.id;
 
         this.bashService.copyAllLog(!Array.isArray(robotsId) ? [robotsId] : robotsId)
             .then(() => res.sendStatus(200),
