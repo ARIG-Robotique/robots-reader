@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "migratedb": "cd flyway-4.2.0 && ./flyway migrate",
-    "build": "tsc",
+    "build": "tsc && cp src/conf.json dist/",
     "dev": "ts-node ./src/server.ts",
     "start": "nodemon ./dist/server.js",
     "prod": "npm run build && npm run start"
@@ -40,6 +40,7 @@
     "typescript-ioc": "^1.2.4"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.4"
+    "@types/cors": "^2.8.4",
+    "typescript": "^3.4.4"
   }
 }

@@ -1,11 +1,8 @@
 import {Request, Response} from 'express';
 import {Inject} from "typescript-ioc";
-import {RobotsService} from "../../../robots-supervisor/src/app/services/robots.service";
 import {Controller} from "../controllers/Controller";
 
 export class Routes {
-    @Inject
-    public robotService: RobotsService;
     @Inject
     public robotController: Controller;
 

@@ -9,7 +9,7 @@ class App {
     public app: express.Application;
     public route: Routes;
     public sequelize: Sequelize;
-    private conf = require('../conf.json');
+    private conf = require('./conf.json');
 
     constructor() {
         this.app = express();
