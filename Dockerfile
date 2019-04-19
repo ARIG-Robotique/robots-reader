@@ -1,26 +1,19 @@
-FROM node:10-alpine as builder
+FROM node:10-alpine
+
+EXPOSE 4100
 
 ENV NODE_ENV dev
 
-RUN mkdir -p /build
+RUN mkdir -p /app
 
-WORKDIR /build
+WORKDIR /app
 
 COPY . .
 
 RUN npm install \
-  && npm run build
+    && npm run build \
+    && npm cache clean --force \
+    && rm -rf ~/.npm \
+    && rm -rf /tmp/npm*
 
-
-
-FROM node:10-alpine
-
-RUN mkdir /app
-
-WORKDIR /app
-
-COPY --from=builder /build/dist .
-
-EXPOSE 80
-
-CMD ["node", "server.js"]
+CMD ["node", "dist/server.js"]

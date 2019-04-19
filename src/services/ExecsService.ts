@@ -13,7 +13,7 @@ import {ReadTimeSeriesService} from './ReadTimeSeriesService';
 const fs = require('fs');
 
 export class ExecsService {
-    private conf = require('../../conf.json');
+    private conf = require('../conf.json');
 
     private influx: InfluxDB;
 

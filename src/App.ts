@@ -22,7 +22,7 @@ class App {
     private config(): void {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: false}));
-        this.app.use(function(req, res, next) {
+        this.app.use(function (req, res, next) {
             res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
             res.header('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
@@ -34,7 +34,7 @@ class App {
     private postgresSetup(): void {
         this.sequelize = new Sequelize({
             name: this.conf.pg.database,
-            dialect: 'postgres',
+            dialect: this.conf.pg.dialect,
             host: this.conf.pg.host,
             port: this.conf.pg.port,
             username: this.conf.pg.user,
@@ -48,10 +48,21 @@ class App {
             // }
         });
 
-        this.sequelize.sync({force: false})
-            .then(() => {
-                console.log(`Database & tables created!`)
-            })
+        this.syncDb();
+    }
+
+    private syncDb() {
+        setTimeout(
+            () =>
+                this.sequelize.sync({force: false})
+                    .then(() => {
+                        console.log(`Database & tables created!`)
+                    }, (e) => {
+                        console.error(e);
+                        this.syncDb();
+                    }),
+            5000
+        );
     }
 }
 

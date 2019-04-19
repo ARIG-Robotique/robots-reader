@@ -23,11 +23,11 @@ export class Controller {
             simulateur: req.body.simulateur
         });
         console.log('robot to be added', robot);
-
-        console.log('this', this);
+        
         this.robotService.save(robot).then((result) => {
             res.status(201).json(result);
-        }, () => {
+        }, (e) => {
+            console.error(e);
             res.sendStatus(500);
         });
     }
