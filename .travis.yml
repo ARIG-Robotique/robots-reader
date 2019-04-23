@@ -1,37 +1,32 @@
 language: node_js
 sudo: required
-
 env:
-  - INFLUXDB_DOCKER_IMAGE="influxdb:1.3-alpine"
-
+- INFLUXDB_DOCKER_IMAGE="influxdb:1.3-alpine"
 node_js:
-  - "6.9"
-
+- '6.9'
 addons:
-  postgresql: "9.6"
-
+  postgresql: '9.6'
 services:
-  - postgresql
-  - docker
-
+- postgresql
+- docker
 before_script:
-  # Copie les scripts SQL de tests
-  - cp -vf flyway-*/sql-tests/* flyway-*/sql/
-
-  # Configuration de la BDD PostgreSQL
-  - psql -c "CREATE ROLE arig LOGIN ENCRYPTED PASSWORD 'md5ebbc2a4c2462fcf3614c4c4d85afa9f3' NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;" -U postgres
-  - psql -c "CREATE DATABASE robots WITH OWNER = arig;" -U postgres
-
-  # Création et configuration d'un instance InfluxDB
-  - docker pull ${INFLUXDB_DOCKER_IMAGE}
-  - docker run -d -p 8086:8086 ${INFLUXDB_DOCKER_IMAGE}
-  - docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'CREATE DATABASE robots'
-  - docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute "CREATE USER arig WITH PASSWORD 'arig'"
-  - docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'GRANT ALL ON robots TO arig'
-
-
+- cp -vf flyway-*/sql-tests/* flyway-*/sql/
+- psql -c "CREATE ROLE arig LOGIN ENCRYPTED PASSWORD 'md5ebbc2a4c2462fcf3614c4c4d85afa9f3'
+  NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;" -U postgres
+- psql -c "CREATE DATABASE robots WITH OWNER = arig;" -U postgres
+- docker pull ${INFLUXDB_DOCKER_IMAGE}
+- docker run -d -p 8086:8086 ${INFLUXDB_DOCKER_IMAGE}
+- docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'CREATE
+  DATABASE robots'
+- docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute "CREATE
+  USER arig WITH PASSWORD 'arig'"
+- docker run --network="host" --rm ${INFLUXDB_DOCKER_IMAGE} influx -execute 'GRANT
+  ALL ON robots TO arig'
 script:
-  - npm run migratedb
-  - node index.js robots
-  - node index.js execs 0
-  - node index.js save 0 12345
+- npm run migratedb
+- node index.js robots
+- node index.js execs 0
+- node index.js save 0 12345
+notifications:
+  slack:
+    secure: bCIS1FjceW3yTBKviC99qsADZnk2eJSgC3JEatGG/Q8cer0cRoFA82jWqDvwxkiW91OT+WNI18ZcMYIK8N2plVFYgwqqOKSLtOeqNMZbhNcfmbCebvovoNtHodMyyWqNhy0rH+ERXPkgE9BI7ExIfoUyYA1w2iFL0OVEScOnsjuzvc2r+g0yxNjGBz+UAU6ucUUeteDarpaB1fD/uSezynOZcY5WmXDBPtpOV6QhZ8a0820zEWZcprmW8gza8MMgdAkWKS9ifyfqs8TWucmDTLEJFvGQ9mRZWItyMy8u3l8FWkQi6vd8nq/L9Mg9UOAyJ08Tx5oj5fv6wpoyUmk8Z2cJfyqVmTb3G3xOm4QvJIRUOtxxrhzvU+bCUmUQYpw9f2BdHVGIYce1owm3f3K14faTumgucNm78iwPC03iNyi4le/DzVV4qD19+cNLlKhno43DKQVvTM5eg9JoZi0xmbCsnj2DEEw1dods90ydtVWoTqJmwSHIZhg5UJOKIQQVpCqlXtziQhzqVyIFiaCCJaq1zkL5JTPUzFAaQquncv/AjrECD861HfQRDTfwvphhX6h7h0ySR0hFhe80l+89I+N19/aVOSMQFy5rMuSAQGeyxYaZ5FvdTL3IM84y6PsFHm/F0OwGrF7j5ngfzvmSVBq6teJSx3QJfu8hWj82E1A=
