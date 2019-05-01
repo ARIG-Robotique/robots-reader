@@ -194,9 +194,8 @@ export class ExecsService {
         return this.create(robot, execs)
             .then((result) => {
                 const savedExecs = result[0];
-                return Promise.all([this.insertLog(result[1].dir, savedExecs),
-                    this.insertTimeSeries(result[1], savedExecs),
-                    this.insertMouvementSeries(result[1], savedExecs)])
+                return Promise.all([
+                    this.insertTimeSeries(result[1], savedExecs)])
             });
     }
 
