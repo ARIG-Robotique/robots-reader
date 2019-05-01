@@ -5,7 +5,7 @@ import * as child from 'child_process';
 
 
 export class BashService {
-    readonly GET_LOGS_SH = '../scripts/getLogs.sh';
+    readonly GET_LOGS_SH = './scripts/getLogs.sh';
 
     @Inject
     private robotService: RobotService;
@@ -27,7 +27,12 @@ export class BashService {
         return new Promise((resolve, reject) => {
             this.robotService.findById(robotId)
                 .then((robot: Robot) => {
-                    child.spawn(this.GET_LOGS_SH, [robot.host, robot.name, this.conf.logsOutput], {stdio: 'inherit', cwd: process.cwd()})
+                    const host = robot.host.split(':')[0];
+                    console.log(`Copy all logs for ${robot.name} from ${host} to ${this.conf.logsOutput}`);
+                    child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput], {
+                        stdio: 'inherit',
+                        cwd: process.cwd()
+                    })
                         .on('close', (code) => {
                             if (code === 0) {
                                 console.log(`Finished copy logs for robot ${robotId}`);
