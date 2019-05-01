@@ -1,28 +1,38 @@
-import {Robot} from "../models/Robot";
-import {ExecsService} from "./ExecsService";
-import {Inject} from "typescript-ioc";
-import {ExecsDTO} from "../dto/ExecsDTO";
-import {RobotDTO} from "../dto/RobotDTO";
-import {Execs} from "../models/Execs";
+import {Robot} from '../models/Robot';
+import {ExecsService} from './ExecsService';
+import {Inject} from 'typescript-ioc';
+import {ExecsDTO} from '../dto/ExecsDTO';
+import {RobotDTO} from '../dto/RobotDTO';
+import {Execs} from '../models/Execs';
 
-export class Service {
+export class RobotService {
     @Inject
     private execsService: ExecsService;
+
+    private conf = require('../conf.json');
 
     constructor() {
     }
 
     public save(robot: Robot) {
+        this.setDir(robot);
         return robot.save();
     }
 
     public update(id: number, robot: Robot) {
+        this.setDir(robot);
         return Robot.update({
             host: robot.host,
             name: robot.name,
             simulateur: robot.simulateur,
             dir: robot.dir
         }, {where: {id: id}});
+    }
+
+    private setDir(robot: Robot) {
+        if (!robot.simulateur) {
+            robot.dir = `${this.conf.logsOutput}/${robot.name}`;
+        }
     }
 
     public findAll() {

@@ -1,7 +1,7 @@
 import {Execs} from '../models/Execs';
 import {Robot} from '../models/Robot';
 import {ReaderLogService} from './ReaderLogService';
-import {Service} from './Service';
+import {RobotService} from './RobotService';
 import {Log} from '../models/Log';
 import {InfluxDB} from 'influx';
 import * as _ from 'lodash';
@@ -20,7 +20,7 @@ export class ExecsService {
     @Inject
     private readerLogService: ReaderLogService;
     @Inject
-    private robotService: Service;
+    private robotService: RobotService;
     @Inject
     private influxService: ReadTimeSeriesService;
 

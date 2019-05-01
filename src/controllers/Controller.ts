@@ -1,16 +1,16 @@
-import {Service} from '../services/Service';
+import {RobotService} from '../services/RobotService';
 import {Request, Response} from 'express';
-import {Robot} from "../models/Robot";
-import {ExecsService} from "../services/ExecsService";
-import {BashService} from "../services/BashService";
+import {Robot} from '../models/Robot';
+import {ExecsService} from '../services/ExecsService';
+import {BashService} from '../services/BashService';
 
 export class Controller {
-    private robotService: Service;
+    private robotService: RobotService;
     private execsService: ExecsService;
     private bashService: BashService;
 
     constructor() {
-        this.robotService = new Service();
+        this.robotService = new RobotService();
         this.execsService = new ExecsService();
         this.bashService = new BashService();
     }

@@ -13,5 +13,6 @@
     "username": "arig",
     "password": "arig",
     "database": "robots"
-  }
+  },
+  "logsOutput": "./logs"
 }

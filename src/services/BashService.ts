@@ -1,6 +1,6 @@
-import {Service} from "./Service";
-import {Inject} from "typescript-ioc";
-import {Robot} from "../models/Robot";
+import {RobotService} from './RobotService';
+import {Inject} from 'typescript-ioc';
+import {Robot} from '../models/Robot';
 import * as child from 'child_process';
 
 
@@ -8,13 +8,9 @@ export class BashService {
     readonly GET_LOGS_SH = '../scripts/getLogs.sh';
 
     @Inject
-    private robotService: Service;
+    private robotService: RobotService;
 
-    private exec: any;
-
-    constructor() {
-        this.exec = child.exec;
-    }
+    private conf = require('../conf.json');
 
     public copyAllLog(robotsId: number[]) {
         const promises = [];
@@ -31,10 +27,16 @@ export class BashService {
         return new Promise((resolve, reject) => {
             this.robotService.findById(robotId)
                 .then((robot: Robot) => {
-                    this.exec(this.GET_LOGS_SH + ' ' + robot.host, (error: string, stdout: string, stderr: string) => {
-                        console.log(`Finished copy logs for robot ${robotId} with log ${stdout}`);
-                        resolve();
-                    });
+                    child.spawn(this.GET_LOGS_SH, [robot.host, robot.name, this.conf.logsOutput], {stdio: 'inherit', cwd: process.cwd()})
+                        .on('close', (code) => {
+                            if (code === 0) {
+                                console.log(`Finished copy logs for robot ${robotId}`);
+                                resolve();
+                            } else {
+                                console.error(`Failed copy logs for robot ${robotId}`);
+                                reject();
+                            }
+                        });
                 });
         });
     }
