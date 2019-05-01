@@ -68,28 +68,28 @@ export class Controller {
         const robotsId = req.params.id;
 
         this.bashService.copyAllLog(!Array.isArray(robotsId) ? [robotsId] : robotsId)
-            .then(() => res.sendStatus(200),
+            .then(() => res.json().status(200),
                 () => res.sendStatus(500));
     }
 
     importLogs(req: Request, res: Response) {
         const robotId = req.params.id;
         this.execsService.importLogsForRobot(robotId)
-            .then(() => res.sendStatus(200),
+            .then(() => res.json().status(200),
                 () => res.sendStatus(500));
     }
 
     deleteRobotExec(req: Request, res: Response) {
         const execId = req.params.id;
         this.execsService.delete(execId)
-            .then(() => res.sendStatus(200),
+            .then(() => res.json().status(200),
                 (error) => res.json(error).sendStatus(500))
     }
 
     deleteRobot(req: Request, res: Response) {
         const robotId = req.params.id;
         this.robotService.delete(robotId)
-            .then(() => res.sendStatus(200),
+            .then(() => res.json().status(200),
                 (err) => res.json(err).sendStatus(500));
     }
 }
