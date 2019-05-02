@@ -13,13 +13,13 @@ export class ReadTimeSeriesService {
      * @param {function} onData appelé pour chaque objet du fichier
      * @returns {Promise}
      */
-    readTimeseries(dir: string, url: string, onData: (item: any, stream: ReadStream) => void) {
+    readTimeseries(dir: string, url: string, onData: (item: any, stream: ReadStream) => void): Promise<any> {
         return new Promise((resolve) => {
             const timeseriesPath = path.join(dir, url);
 
             fs.access(timeseriesPath, (err) => {
                 if (err) {
-                    console.log('Timeseries file does not exists');
+                    console.log(`${timeseriesPath} does not exists`);
                     resolve();
                 }
 
@@ -43,7 +43,7 @@ export class ReadTimeSeriesService {
      * @param exec
      * @param onData
      */
-    readMouvementSeriesBatch(dir, exec, onData) {
+    readMouvementSeriesBatch(dir, exec, onData): Promise<any> {
         const url = `${exec}-mouvement.json`;
         return this.readSeriesFile(dir, url, onData);
     }
@@ -60,18 +60,17 @@ export class ReadTimeSeriesService {
         return this.readSeriesFile(dir, url, onData);
     }
 
-    readSeriesFile(dir: string, url: string, onData: (items: any[]) => Promise<any>) {
+    readSeriesFile(dir: string, url: string, onData: (items: any[]) => Promise<any>): Promise<any> {
         let items = [];
-
         return this.readTimeseries(dir, url, (item, stream) => {
             items.push(item);
 
             if (items.length >= 100) {
-                stream.pause();
+                stream && stream.pause();
 
                 onData(items.slice(0))
                     .then(() => {
-                        stream.resume();
+                        stream && stream.resume();
                     }, (err) => {
                         stream.destroy();
                         return Promise.reject(err);

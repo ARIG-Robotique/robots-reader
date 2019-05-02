@@ -42,41 +42,41 @@ export class ExecsService {
             });
     }
 
-    public delete(idExec: number) {
+    public delete(idExec: number): Promise<void> {
 
         return Promise.all([Execs.findByPrimary(idExec), this.getMouvementByExecsId(idExec)])
             .then(result => {
                 const exec: Execs = result[0];
                 const mouvements: Mouvement[] = result[1];
 
-                var promises = [];
+                const promises = [];
                 mouvements.forEach(mouvement => promises.push(mouvement.destroy()));
 
                 return Promise.all(promises)
-                    .then(result => {
+                    .then(() => {
                         return exec.destroy();
                     });
             });
     }
 
-    private getMouvementByExecsId(idExec: number) {
-        return Mouvement.findAll({
+    private getMouvementByExecsId(idExec: number): Promise<Mouvement[]> {
+        return Promise.resolve(Mouvement.findAll({
             where: {
                 execsId: idExec
             }
-        });
+        }));
     }
 
-    public findAllExecsByRobotId(robotId: number) {
-        return Execs.findAll({
+    public findAllExecsByRobotId(robotId: number): Promise<Execs[]> {
+        return Promise.resolve(Execs.findAll({
             where: {
                 robotId: robotId
             }
-        });
+        }));
     }
 
-    public insertLog(robotDir, exec: Execs) {
-        console.info(`Insert log to postgres ${robotDir} and ${exec.numberExec}`);
+    public insertLog(robotDir, exec: Execs): Promise<any> {
+        console.info(`Insert log to postgres for ${robotDir} and ${exec.numberExec}`);
 
         return this.readerLogService.readLogBatch(robotDir, exec.numberExec, (items) => {
             return Promise.all(items.map(item => {
@@ -106,11 +106,14 @@ export class ExecsService {
         return mouvement;
     }
 
-    public insertMouvementSeries(robot: Robot, exec: Execs) {
-        let promises = [];
+    public insertMouvementSeries(robot: Robot, exec: Execs): Promise<void> {
+
+        console.log(`Insert mouvement series for ${robot.id} ${robot.name}`);
 
         return new Promise((resolve, reject) => {
             this.influxService.readMouvementSeriesBatch(robot.dir, exec.numberExec, (items, stream) => {
+                const promises = [];
+
                 stream && stream.pause();
 
                 for (let i = 0; i < items.length; i++) {
@@ -120,7 +123,6 @@ export class ExecsService {
                 Promise.all(promises).then(() => {
                     stream && stream.resume();
                 }, (err) => {
-                    console.log(err);
                     stream && stream.destroy();
                     reject(err);
                 });
@@ -130,8 +132,8 @@ export class ExecsService {
         });
     }
 
-    public insertTimeSeries(robot: Robot, exec: Execs) {
-        console.log(`Insert log series into influx ${robot.id} and ${exec.numberExec}`);
+    public insertTimeSeries(robot: Robot, exec: Execs): Promise<any> {
+        console.log(`Insert log series to influx ${robot.id} ${robot.name} and ${exec.numberExec}`);
 
         return this.influxService.readTimeseriesBatch(robot.dir, exec.numberExec, (items) => {
             return this.influx.writePoints(items.map((item) => {
@@ -148,7 +150,7 @@ export class ExecsService {
         });
     }
 
-    private logMapper(item, idExecs) {
+    private logMapper(item, idExecs): Log {
         const log = new Log();
         log.clazz = item.class;
         log.date = item.date;
@@ -160,7 +162,7 @@ export class ExecsService {
         return log;
     }
 
-    public loadLog(robot: Robot, execNum: string) {
+    public loadLog(robot: Robot, execNum: string): Promise<void> {
         console.info(`Read log for ${robot.id}`);
 
         return this.create(robot, execNum)
@@ -169,14 +171,15 @@ export class ExecsService {
                     this.insertLog(robot.dir, savedExecs),
                     this.insertTimeSeries(robot, savedExecs),
                     this.insertMouvementSeries(robot, savedExecs)
-                ]);
+                ]).then(() => Promise.resolve()
+                    , () => Promise.reject());
             });
     }
 
-    public importLogsForRobot(robotId: number) {
+    public importLogsForRobot(robotId: number): Promise<void> {
         console.log(`Import logs for robot ${robotId}`);
 
-        return Robot.findByPrimary(robotId)
+        return Promise.resolve(Robot.findByPk(robotId)
             .then((robot: Robot) => {
                 console.log(`Read log in dir ${robot.dir}`);
 
@@ -188,10 +191,10 @@ export class ExecsService {
             })
             .then(([robot, execsNum]: [Robot, string[]]) => {
                 return this.importLogs(robot, execsNum);
-            });
+            }));
     }
 
-    private listExecs(dir: string) {
+    private listExecs(dir: string): Promise<string[]> {
         return new Promise((resolve, reject) => {
             fs.readdir(dir, (error, files: string[]) => {
                 if (error) {
@@ -206,10 +209,10 @@ export class ExecsService {
         });
     }
 
-    private importLogs(robot: Robot, execsNum: string[]) {
+    private importLogs(robot: Robot, execsNum: string[]): Promise<void> {
         console.log(`Import logs for robot ${robot.id} with execsNum: ${execsNum}`);
 
-        return this.getAllExecByRobot(robot.id)
+        return Promise.resolve(this.getAllExecByRobot(robot.id)
             .then((execs: Execs[]) => {
                 const savedExecsNum = execs.map(exec => exec.numberExec);
                 const filteredExecsNum = execsNum.filter(execNum => savedExecsNum.indexOf(execNum) === -1);
@@ -219,17 +222,19 @@ export class ExecsService {
                 if (filteredExecsNum.length > 0) {
                     return Promise.all(filteredExecsNum.map(execNum => {
                         return this.loadLog(robot, execNum);
-                    }));
+                    }))
+                        .then(() => Promise.resolve(),
+                            () => Promise.reject());
                 }
-            });
+            }));
     }
 
-    private getAllExecByRobot(robotId: number) {
-        return Execs.findAll({
+    private getAllExecByRobot(robotId: number): Promise<Execs[]> {
+        return Promise.resolve(Execs.findAll({
             where: {
                 robotId: robotId,
             }
-        });
+        }));
     }
 
     private influxDbSetup(): void {

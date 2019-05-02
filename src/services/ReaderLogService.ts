@@ -144,8 +144,6 @@ export class ReaderLogService {
         let items = [];
 
         return this.readLog(robotDir, execName, (item, stream) => {
-            console.log(`read log batch  ${JSON.stringify(item)}`);
-
             items.push(item);
 
             if (items.length >= 200) {

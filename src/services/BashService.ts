@@ -12,23 +12,28 @@ export class BashService {
 
     private conf = require('../conf.json');
 
-    public copyAllLog(robotsId: number[]) {
+    public copyAllLog(robotsId: number[]): Promise<void> {
         const promises = [];
+
+        console.log(`Copy logs for robots ${robotsId}`);
 
         robotsId.forEach((robotId: number) => {
             promises.push(this.copyRobotLogs(robotId));
         });
 
         return Promise.all(promises)
-            .then(() => 'finished');
+            .then(() => Promise.resolve(),
+                () => Promise.reject());
     }
 
-    private copyRobotLogs(robotId: number) {
+    private copyRobotLogs(robotId: number): Promise<void> {
         return new Promise((resolve, reject) => {
             this.robotService.findById(robotId)
                 .then((robot: Robot) => {
                     const host = robot.host.split(':')[0];
-                    console.log(`Copy all logs for ${robot.name} from ${host} to ${this.conf.logsOutput}`);
+
+                    console.log(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${this.conf.logsOutput}`);
+
                     child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput], {
                         stdio: 'inherit',
                         cwd: process.cwd()

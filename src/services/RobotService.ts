@@ -14,19 +14,19 @@ export class RobotService {
     constructor() {
     }
 
-    public save(robot: Robot) {
+    public save(robot: Robot): Promise<Robot> {
         this.setDir(robot);
-        return robot.save();
+        return Promise.resolve(robot.save());
     }
 
-    public update(id: number, robot: Robot) {
+    public update(id: number, robot: Robot): Promise<[number, Robot[]]> {
         this.setDir(robot);
-        return Robot.update({
+        return Promise.resolve(Robot.update({
             host: robot.host,
             name: robot.name,
             simulateur: robot.simulateur,
             dir: robot.dir
-        }, {where: {id: id}});
+        }, {where: {id: id}}));
     }
 
     private setDir(robot: Robot) {
@@ -35,18 +35,21 @@ export class RobotService {
         }
     }
 
-    public findAll() {
-        return Robot.findAll();
+    public findAll(): Promise<Robot[]> {
+        return Promise.resolve(Robot.findAll());
     }
 
-    public findById(id: number) {
-        return Robot.findByPrimary(id);
+    public findById(id: number): Promise<Robot> {
+        return Promise.resolve(Robot.findByPk(id));
     }
 
-    public loadRobotFullInfos(id: number) {
+    public loadRobotFullInfos(id: number): Promise<RobotDTO> {
 
         return new Promise((resolve, reject) => {
-            Promise.all([this.findById(id), this.execsService.findAllExecsByRobotId(id)])
+            Promise.all([
+                this.findById(id),
+                this.execsService.findAllExecsByRobotId(id)
+            ])
                 .then((result) => {
                     const robot: Robot = result[0];
                     const execs: Execs[] = result[1];
@@ -60,17 +63,23 @@ export class RobotService {
         });
     }
 
-    public delete(robotId: number) {
-        return Promise.all([Robot.findByPrimary(robotId), this.execsService.findAllExecsByRobotId(robotId)])
+    public delete(robotId: number): Promise<void> {
+        return Promise.all([
+            Robot.findByPk(robotId),
+            this.execsService.findAllExecsByRobotId(robotId)
+        ])
             .then(result => {
                 const robot: Robot = result[0];
                 const execs: Execs[] = result[1];
+
                 const promise = [];
+
                 execs.forEach(exec => promise.push(this.execsService.delete(exec.id)));
+
                 return Promise.all(promise)
-                    .then(res => {
+                    .then(() => {
                         return robot.destroy();
-                    })
+                    }, (error) => Promise.reject(error))
             });
     }
 }
