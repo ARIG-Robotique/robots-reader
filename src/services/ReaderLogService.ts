@@ -15,7 +15,7 @@ export class ReaderLogService {
      * @returns {Promise.<Object>}
      */
     getStartEnd(robotDir: string, execNum: string) {
-        const tracesPath = path.join(robotDir, `${execNum}-traces.log`);
+        const tracesPath = path.join(robotDir, `${execNum}.exec`);
 
         return Promise.all([
             this.firstLine(tracesPath),
