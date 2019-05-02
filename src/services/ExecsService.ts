@@ -28,19 +28,18 @@ export class ExecsService {
         this.influxDbSetup();
     }
 
-    public create(robot: Robot, execs: Execs) {
-        return new Promise<any>((resolve, reject) => {
-            this.readerLogService.getStartEnd(robot.dir, execs.numberExec)
-                .then(dates => {
-                    const execsModel = new Execs({
-                        robotId: robot.id,
-                        numberExec: execs.numberExec,
-                        dateStart: dates.start,
-                        dateEnd: dates.end
-                    });
-                    execsModel.save().then(savedExecs => resolve([savedExecs, robot]));
-                }, (err) => reject(err));
-        });
+    public create(robot: Robot, execNum: string): Promise<Execs> {
+        return this.readerLogService.getStartEnd(robot.dir, execNum)
+            .then(dates => {
+                const execsModel = new Execs({
+                    robotId: robot.id,
+                    numberExec: execNum,
+                    dateStart: dates.start,
+                    dateEnd: dates.end
+                });
+
+                return execsModel.save();
+            });
     }
 
     public delete(idExec: number) {
@@ -78,26 +77,11 @@ export class ExecsService {
 
     public insertLog(robotDir, exec: Execs) {
         console.info(`Insert log to postgres ${robotDir} and ${exec.numberExec}`);
-        let promises = [];
-        return new Promise<any>((resolve, reject) => {
-            this.readerLogService.readLogBatch(robotDir, exec.numberExec, (items, stream) => {
-                stream && stream.pause();
-                for (let i = 0; i < items.length; i++) {
-                    promises.push(this.logMapper(items[i], exec.id).save());
-                }
 
-                Promise.all(promises).then(() => {
-                    stream && stream.resume();
-                }, (err) => {
-                    console.log(err);
-                    // stream && stream.destroy();
-                    reject(err);
-                });
-            })
-                .then(() => {
-                    console.log('finish insert log');
-                    resolve();
-                });
+        return this.readerLogService.readLogBatch(robotDir, exec.numberExec, (items) => {
+            return Promise.all(items.map(item => {
+                return this.logMapper(item, exec.id).save();
+            }));
         });
     }
 
@@ -148,32 +132,19 @@ export class ExecsService {
 
     public insertTimeSeries(robot: Robot, exec: Execs) {
         console.log(`Insert log series into influx ${robot.id} and ${exec.numberExec}`);
-        return new Promise((resolve, reject) => {
-            this.influxService.readTimeseriesBatch(robot.dir, exec.numberExec, (items, stream) => {
-                stream && stream.pause();
 
-                this.influx.writePoints(items.map((item) => {
-                    return {
-                        measurement: item.measurementName,
-                        timestamp: item.time,
-                        tags: _.extend({idexec: exec.id, robot: robot.name}, item.tags),
-                        fields: item.fields
-                    };
-                }), {
-                    database: this.conf.influx.database,
-                    precision: 'ms'
-                })
-                    .then(() => {
-                        stream && stream.resume();
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        stream && stream.destroy();
-                        reject(err);
-                    });
-            })
-                .then((result) => resolve(result))
-                .catch((error) => reject(error));
+        return this.influxService.readTimeseriesBatch(robot.dir, exec.numberExec, (items) => {
+            return this.influx.writePoints(items.map((item) => {
+                return {
+                    measurement: item.measurementName,
+                    timestamp: item.time,
+                    tags: _.extend({idexec: exec.id, robot: robot.name}, item.tags),
+                    fields: item.fields
+                };
+            }), {
+                database: this.conf.influx.database,
+                precision: 'ms'
+            });
         });
     }
 
@@ -189,56 +160,66 @@ export class ExecsService {
         return log;
     }
 
-    public loadLog(robot: Robot, execs: Execs) {
+    public loadLog(robot: Robot, execNum: string) {
         console.info(`Read log for ${robot.id}`);
-        return this.create(robot, execs)
-            .then((result) => {
-                const savedExecs = result[0];
+
+        return this.create(robot, execNum)
+            .then((savedExecs) => {
                 return Promise.all([
-                    this.insertTimeSeries(result[1], savedExecs)])
+                    this.insertLog(robot.dir, savedExecs),
+                    this.insertTimeSeries(robot, savedExecs),
+                    this.insertMouvementSeries(robot, savedExecs)
+                ]);
             });
     }
 
     public importLogsForRobot(robotId: number) {
         console.log(`Import logs for robot ${robotId}`);
-        return new Promise((resolve, reject) => {
-            Robot.findByPrimary(robotId)
-                .then((robot: Robot) => {
-                    console.log(`Read log in dir ${robot.dir}`);
-                    fs.readdir(robot.dir, (error, files: string[]) => {
-                        if (error) {
-                            reject(error);
-                        }
-                        else {
-                            let execsNum = files.filter(file => file.endsWith('.exec'))
-                                .map(file => file.split('.')[0]);
-                            const optimizedExecsNum = [...new Set(execsNum)];
-                            console.log(`Optimized Execsnum ${optimizedExecsNum}`);
-                            this.importLogs(robot, optimizedExecsNum)
-                                .then(() => resolve(),
-                                    (err) => reject(err));
-                        }
+
+        return Robot.findByPrimary(robotId)
+            .then((robot: Robot) => {
+                console.log(`Read log in dir ${robot.dir}`);
+
+                return this.listExecs(robot.dir)
+                    .then((execsNum) => {
+                        console.log(`Optimized Execsnum ${execsNum}`);
+                        return [robot, execsNum];
                     });
-                }, error => reject(error));
+            })
+            .then(([robot, execsNum]: [Robot, string[]]) => {
+                return this.importLogs(robot, execsNum);
+            });
+    }
+
+    private listExecs(dir: string) {
+        return new Promise((resolve, reject) => {
+            fs.readdir(dir, (error, files: string[]) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    let execsNum = files
+                        .filter(file => file.split('-').length > 1)
+                        .map(file => file.split('-')[0]);
+                    resolve([...new Set(execsNum)]);
+                }
+            });
         });
     }
 
     private importLogs(robot: Robot, execsNum: string[]) {
         console.log(`Import logs for robot ${robot.id} with execsNum: ${execsNum}`);
+
         return this.getAllExecByRobot(robot.id)
             .then((execs: Execs[]) => {
                 const savedExecsNum = execs.map(exec => exec.numberExec);
-                execsNum = execsNum.filter(execNum => savedExecsNum.indexOf(execNum) === -1);
-                console.log(`Import ${execsNum.length} files`);
-                if (execsNum.length > 0) {
-                    const promises = [];
-                    execsNum.forEach(execNum => {
-                        const execs = new Execs();
-                        execs.numberExec = execNum;
-                        promises.push(this.loadLog(robot, execs));
-                    });
+                const filteredExecsNum = execsNum.filter(execNum => savedExecsNum.indexOf(execNum) === -1);
 
-                    return Promise.all(promises);
+                console.log(`Import ${filteredExecsNum.length} files`);
+
+                if (filteredExecsNum.length > 0) {
+                    return Promise.all(filteredExecsNum.map(execNum => {
+                        return this.loadLog(robot, execNum);
+                    }));
                 }
             });
     }
@@ -257,8 +238,7 @@ export class ExecsService {
             .then((names) => {
                 if (!_.find(names, this.conf.influx.database)) {
                     return this.influx.createDatabase(this.conf.influx.database);
-                }
-                else {
+                } else {
                     return Promise.resolve();
                 }
             });

@@ -1,3 +1,5 @@
+import {ReadStream} from "fs";
+
 const Promise = require('promise');
 const path = require('path');
 const fs = require('fs');
@@ -11,19 +13,27 @@ export class ReadTimeSeriesService {
      * @param {function} onData appelé pour chaque objet du fichier
      * @returns {Promise}
      */
-    readTimeseries(dir, url, onData) {
+    readTimeseries(dir: string, url: string, onData: (item: any, stream: ReadStream) => void) {
         return new Promise((resolve) => {
             const timeseriesPath = path.join(dir, url);
-            const stream = StreamArray.make();
-            const fileStream = fs.createReadStream(timeseriesPath);
 
-            stream.output.on('data', (item) => {
-                onData(item.value, fileStream);
+            fs.access(timeseriesPath, (err) => {
+                if (err) {
+                    console.log('Timeseries file does not exists');
+                    resolve();
+                }
+
+                const stream = StreamArray.make();
+                const fileStream = fs.createReadStream(timeseriesPath);
+
+                stream.output.on('data', (item) => {
+                    onData(item.value, fileStream);
+                });
+
+                stream.output.on('end', () => resolve());
+
+                fileStream.pipe(stream.input);
             });
-
-            stream.output.on('end', () => resolve());
-
-            fileStream.pipe(stream.input);
         });
     }
 
@@ -45,28 +55,33 @@ export class ReadTimeSeriesService {
      * @param {function} onData appelé pour chaque groupe de 100 objets du fichier
      * @returns {Promise}
      */
-    readTimeseriesBatch(dir, exec, onData) {
+    readTimeseriesBatch(dir: string, exec: string, onData: (items: any[]) => Promise<any>) {
         const url = `${exec}-timeseries.json`;
         return this.readSeriesFile(dir, url, onData);
     }
 
-    readSeriesFile(dir, url, onData) {
+    readSeriesFile(dir: string, url: string, onData: (items: any[]) => Promise<any>) {
         let items = [];
-        return new Promise((resolve, reject) => {
-            this.readTimeseries(dir, url, (item, stream) => {
-                items.push(item);
 
-                if (items.length >= 100) {
-                    onData(items.slice(0), stream);
-                    items.length = 0;
-                }
-            })
-                .then(() => {
-                    if (items.length > 0) {
-                        onData(items);
-                    }
-                    resolve();
-                }, error => reject(error));
-        });
+        return this.readTimeseries(dir, url, (item, stream) => {
+            items.push(item);
+
+            if (items.length >= 100) {
+                stream.pause();
+
+                onData(items.slice(0))
+                    .then(() => {
+                        stream.resume();
+                    }, (err) => {
+                        stream.destroy();
+                        return Promise.reject(err);
+                    });
+
+                items.length = 0;
+            }
+        })
+            .then(() => {
+                return onData(items);
+            });
     }
 }
