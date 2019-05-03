@@ -39,7 +39,7 @@ export class ExecsService {
                 });
 
                 return execsModel.save();
-            });
+            }, (error: Error) => Promise.reject(error));
     }
 
     public delete(idExec: number): Promise<void> {
@@ -167,13 +167,16 @@ export class ExecsService {
 
         return this.create(robot, execNum)
             .then((savedExecs) => {
-                return Promise.all([
-                    this.insertLog(robot.dir, savedExecs),
-                    this.insertTimeSeries(robot, savedExecs),
-                    this.insertMouvementSeries(robot, savedExecs)
-                ]).then(() => Promise.resolve()
-                    , () => Promise.reject());
-            });
+                    return Promise.all([
+                        this.insertLog(robot.dir, savedExecs),
+                        this.insertTimeSeries(robot, savedExecs),
+                        this.insertMouvementSeries(robot, savedExecs)
+                    ]).then(() => Promise.resolve()
+                        , () => {
+                            Promise.reject();
+                        });
+                }, (err) => Promise.reject(err)
+            );
     }
 
     public importLogsForRobot(robotId: number): Promise<void> {
@@ -187,11 +190,16 @@ export class ExecsService {
                     .then((execsNum) => {
                         console.log(`Optimized Execsnum ${execsNum}`);
                         return [robot, execsNum];
-                    });
+                    }, (error) => Promise.reject(error));
             })
             .then(([robot, execsNum]: [Robot, string[]]) => {
-                return this.importLogs(robot, execsNum);
-            }));
+
+                this.importLogs(robot, execsNum)
+                    .then((result) => Promise.resolve(result),
+                        (err) => Promise.reject(err)
+                    );
+
+            }, () => Promise.reject()));
     }
 
     private listExecs(dir: string): Promise<string[]> {
@@ -212,21 +220,27 @@ export class ExecsService {
     private importLogs(robot: Robot, execsNum: string[]): Promise<void> {
         console.log(`Import logs for robot ${robot.id} with execsNum: ${execsNum}`);
 
-        return Promise.resolve(this.getAllExecByRobot(robot.id)
+        return this.getAllExecByRobot(robot.id)
             .then((execs: Execs[]) => {
                 const savedExecsNum = execs.map(exec => exec.numberExec);
-                const filteredExecsNum = execsNum.filter(execNum => savedExecsNum.indexOf(execNum) === -1);
+                const filteredExecsNum: string[] = execsNum.filter(execNum => savedExecsNum.indexOf(execNum) === -1);
 
                 console.log(`Import ${filteredExecsNum.length} files`);
 
                 if (filteredExecsNum.length > 0) {
-                    return Promise.all(filteredExecsNum.map(execNum => {
-                        return this.loadLog(robot, execNum);
-                    }))
+                    const promises = [];
+
+                    filteredExecsNum.forEach(execNum => {
+                        promises.push(this.loadLog(robot, execNum));
+                    });
+
+                    Promise.all(promises)
                         .then(() => Promise.resolve(),
-                            () => Promise.reject());
+                            () => {
+                                return Promise.reject();
+                            });
                 }
-            }));
+            }, (err) => Promise.reject(err));
     }
 
     private getAllExecByRobot(robotId: number): Promise<Execs[]> {

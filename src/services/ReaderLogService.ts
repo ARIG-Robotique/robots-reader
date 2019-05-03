@@ -35,27 +35,29 @@ export class ReaderLogService {
      * Retourne la date de début et la date de fin pour une execution
      */
     getStartEnd(robotDir: string, execNum: string): Promise<{ start: Date, end: Date }> {
-        const tracesPath = path.join(robotDir, `${execNum}.exec`);
+        return new Promise<{start: Date, end: Date}>((resolve, reject) => {
+            const tracesPath = path.join(robotDir, `${execNum}.exec`);
+            return Promise.all([
+                this.firstLine(tracesPath),
+                this.lastLine(tracesPath)
+            ])
+                .then((res) => {
+                    const dates = {
+                        start: this.parseLineDate(res[0]),
+                        end: this.parseLineDate(res[1])
+                    };
 
-        return Promise.all([
-            this.firstLine(tracesPath),
-            this.lastLine(tracesPath)
-        ])
-            .then((res) => {
-                const dates = {
-                    start: this.parseLineDate(res[0]),
-                    end: this.parseLineDate(res[1])
-                };
-
-                if (!dates.start.isValid() || !dates.end.isValid()) {
-                    return Promise.reject('Cannot parse dates');
-                } else {
-                    return Promise.resolve({
-                        start: dates.start.toDate(),
-                        end: dates.end.toDate(),
-                    });
-                }
-            });
+                    console.log(`Dates validity ${dates.start} ${dates.start.isValid()} && ${dates.end.isValid()}`);
+                    if (!dates.start.isValid() || !dates.end.isValid()) {
+                        reject('Cannot parse dates');
+                    } else {
+                        resolve({
+                            start: dates.start.toDate(),
+                            end: dates.end.toDate(),
+                        });
+                    }
+                });
+        });
     }
 
     /**
