@@ -13,7 +13,7 @@ export class ReadTimeSeriesService {
      * @param {function} onData appelé pour chaque objet du fichier
      * @returns {Promise}
      */
-    readTimeseries(dir: string, url: string, onData: (item: any, stream: ReadStream) => void): Promise<any> {
+    readTimeseries(dir: string, url: string, onData: (item: any, readStream: ReadStream) => void): Promise<any> {
         return new Promise((resolve) => {
             const timeseriesPath = path.join(dir, url);
 
@@ -24,13 +24,16 @@ export class ReadTimeSeriesService {
                 }
 
                 const stream = StreamArray.make();
-                const fileStream = fs.createReadStream(timeseriesPath);
+                const fileStream: ReadStream = fs.createReadStream(timeseriesPath);
 
                 stream.output.on('data', (item) => {
                     onData(item.value, fileStream);
                 });
 
-                stream.output.on('end', () => resolve());
+                stream.output.on('end', () => {
+                    fileStream.close();
+                    resolve();
+                });
 
                 fileStream.pipe(stream.input);
             });
@@ -62,7 +65,7 @@ export class ReadTimeSeriesService {
 
     readSeriesFile(dir: string, url: string, onData: (items: any[]) => Promise<any>): Promise<any> {
         let items = [];
-        return this.readTimeseries(dir, url, (item, stream) => {
+        return this.readTimeseries(dir, url, (item: any, stream: ReadStream) => {
             items.push(item);
 
             if (items.length >= 100) {

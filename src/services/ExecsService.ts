@@ -168,9 +168,9 @@ export class ExecsService {
         return this.create(robot, execNum)
             .then((savedExecs) => {
                     return Promise.all([
-                        this.insertLog(robot.dir, savedExecs),
                         this.insertTimeSeries(robot, savedExecs),
-                        this.insertMouvementSeries(robot, savedExecs)
+                        this.insertMouvementSeries(robot, savedExecs),
+                        this.insertLog(robot.dir, savedExecs)
                     ]).then(() => Promise.resolve()
                         , () => {
                             Promise.reject();

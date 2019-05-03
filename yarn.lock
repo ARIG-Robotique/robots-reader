@@ -60,7 +60,7 @@
 
 "@types/line-by-line@^0.1.2":
   version "0.1.2"
-  resolved "http://nexus.forge.local/repository/npm-group-all/@types/line-by-line/-/line-by-line-0.1.2.tgz#87e57bd453c45d5ab702b9f8bac27b4c03a47794"
+  resolved "https://registry.npmjs.org/@types/line-by-line/-/line-by-line-0.1.2.tgz#87e57bd453c45d5ab702b9f8bac27b4c03a47794"
   integrity sha512-jnJt8XJ/mLwMe2p7d6EMunNUWihYHqMlXLUGNnb5YxVQRMK226QunBo80GbjRb2XKP7CIXWBobBp0mCTwGfITA==
   dependencies:
     "@types/node" "*"
