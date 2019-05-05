@@ -171,11 +171,8 @@ export class ExecsService {
                         this.insertTimeSeries(robot, savedExecs),
                         this.insertMouvementSeries(robot, savedExecs),
                         this.insertLog(robot.dir, savedExecs)
-                    ]).then(() => Promise.resolve()
-                        , () => {
-                            Promise.reject();
-                        });
-                }, (err) => Promise.reject(err)
+                    ]).then(() => undefined);
+                }
             );
     }
 
@@ -192,14 +189,7 @@ export class ExecsService {
                         return [robot, execsNum];
                     }, (error) => Promise.reject(error));
             })
-            .then(([robot, execsNum]: [Robot, string[]]) => {
-
-                this.importLogs(robot, execsNum)
-                    .then((result) => Promise.resolve(result),
-                        (err) => Promise.reject(err)
-                    );
-
-            }, () => Promise.reject()));
+            .then(([robot, execsNum]: [Robot, string[]]) => this.importLogs(robot, execsNum)));
     }
 
     private listExecs(dir: string): Promise<string[]> {
@@ -209,8 +199,8 @@ export class ExecsService {
                     reject(error);
                 } else {
                     let execsNum = files
-                        .filter(file => file.split('-').length > 1)
-                        .map(file => file.split('-')[0]);
+                        .filter(file => file.split('.exec').length > 1)
+                        .map(file => file.split('.')[0]);
                     resolve([...new Set(execsNum)]);
                 }
             });
@@ -234,13 +224,10 @@ export class ExecsService {
                         promises.push(this.loadLog(robot, execNum));
                     });
 
-                    Promise.all(promises)
-                        .then(() => Promise.resolve(),
-                            () => {
-                                return Promise.reject();
-                            });
+                    return Promise.all(promises)
+                        .then(() => undefined);
                 }
-            }, (err) => Promise.reject(err));
+            });
     }
 
     private getAllExecByRobot(robotId: number): Promise<Execs[]> {
