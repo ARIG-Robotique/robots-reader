@@ -210,8 +210,8 @@ export class ExecsService {
                             reject(error);
                         }
                         else {
-                            let execsNum = files.filter(file => file.split('-').length > 1)
-                                .map(file => file.split('-')[0]);
+                            let execsNum = files.filter(file => file.endsWith('.exec'))
+                                .map(file => file.split('.')[0]);
                             const optimizedExecsNum = [...new Set(execsNum)];
                             console.log(`Optimized Execsnum ${optimizedExecsNum}`);
                             this.importLogs(robot, optimizedExecsNum)
