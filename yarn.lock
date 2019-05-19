@@ -85,20 +85,10 @@
   resolved "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
   integrity sha512-ewFXqrQHlFsgc09MK5jP5iR7vumV/BYayNC6PgJO2LPe8vrnNFyjQjSppfEngITi0qvfKtzFvgKymGheFM9UOA==
 
-"@types/sequelize@4.28.1":
+"@types/sequelize@4.28.1", "@types/sequelize@^4.28.1":
   version "4.28.1"
   resolved "https://registry.npmjs.org/@types/sequelize/-/sequelize-4.28.1.tgz#9f111fba37527cf1d6c99da9203c278b7df275aa"
   integrity sha512-fitAlHqmoZ2rn7KJOo+1lF+uC7zeUSoW2kTiEaEzgVSFD03nPkkKIZss4XrL34KCn+7wtKvmBO1Kb6NCmLF1Fw==
-  dependencies:
-    "@types/bluebird" "*"
-    "@types/continuation-local-storage" "*"
-    "@types/lodash" "*"
-    "@types/validator" "*"
-
-"@types/sequelize@^4.27.33":
-  version "4.27.48"
-  resolved "https://registry.npmjs.org/@types/sequelize/-/sequelize-4.27.48.tgz#59bb61e011c92c70d9ddd8d760ee3a82631ad69d"
-  integrity sha512-ucmRwubpewi2zjSfoCzfB7CMXoxJyn2TkfNdRgLxa3RVxhygclH7yfKOkPW7ef07uPatrn39ermVKDnr6GH+Eg==
   dependencies:
     "@types/bluebird" "*"
     "@types/continuation-local-storage" "*"

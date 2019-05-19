@@ -111,8 +111,8 @@ export class ReaderLogService {
                     resolve();
                 });
 
-                stream.on('error', (error) => {
-                    console.error(`Error while reading log ${tracesPath}`);
+                stream.on('error', (error: Error) => {
+                    console.error(`Error while reading log ${tracesPath} with error : ${error.stack}`);
                     resolve();
                 });
             });

@@ -44,7 +44,7 @@ export class ExecsService {
 
     public delete(idExec: number): Promise<void> {
 
-        return Promise.all([Execs.findByPrimary(idExec), this.getMouvementByExecsId(idExec)])
+        return Promise.all([Execs.findByPk(idExec), this.getMouvementByExecsId(idExec)])
             .then(result => {
                 const exec: Execs = result[0];
                 const mouvements: Mouvement[] = result[1];
