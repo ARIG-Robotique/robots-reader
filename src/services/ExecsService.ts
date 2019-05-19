@@ -79,9 +79,13 @@ export class ExecsService {
         console.info(`Insert log to postgres for ${robotDir} and ${exec.numberExec}`);
 
         return this.readerLogService.readLogBatch(robotDir, exec.numberExec, (items) => {
-            return Promise.all(items.map(item => {
-                return this.logMapper(item, exec.id).save();
-            }));
+            if (items) {
+                return Promise.all(items.map(item => {
+                    return this.logMapper(item, exec.id).save();
+                }));
+            } else {
+                return Promise.resolve();
+            }
         });
     }
 
@@ -171,9 +175,15 @@ export class ExecsService {
                         this.insertTimeSeries(robot, savedExecs),
                         this.insertMouvementSeries(robot, savedExecs),
                         this.insertLog(robot.dir, savedExecs)
-                    ]).then(() => undefined);
+                    ]).then(() => {
+
+                        console.log(`Finished import logs for ${robot.id} ${robot.name}`);
+                        return Promise.resolve();
+                    });
                 }
-            );
+                , (error: Error) => {
+                    return Promise.reject();
+                });
     }
 
     public importLogsForRobot(robotId: number): Promise<void> {
@@ -227,7 +237,8 @@ export class ExecsService {
                     });
 
                     return Promise.all(promises)
-                        .then(() => undefined);
+                        .then(() => undefined,
+                            () => undefined);
                 }
             });
     }

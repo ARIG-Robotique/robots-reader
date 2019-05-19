@@ -9,8 +9,9 @@ export class ReaderLogService {
 
     firstLine(path: string) {
         return new Promise((resolve, reject) => {
-            firstLine(path, (err, line) => {
+            firstLine(path, (err: Error, line) => {
                 if (err) {
+                    console.error(`Error while reading first line ${err.stack}`);
                     reject(err);
                 } else {
                     resolve(line);
@@ -21,8 +22,9 @@ export class ReaderLogService {
 
     lastLine(path: string) {
         return new Promise((resolve, reject) => {
-            lastLine(path, (err, line) => {
+            lastLine(path, (err: Error, line) => {
                 if (err) {
+                    console.error(`Error while reading last line ${err.message}`);
                     reject(err);
                 } else {
                     resolve(line);
@@ -35,7 +37,7 @@ export class ReaderLogService {
      * Retourne la date de début et la date de fin pour une execution
      */
     getStartEnd(robotDir: string, execNum: string): Promise<{ start: Date, end: Date }> {
-        return new Promise<{start: Date, end: Date}>((resolve, reject) => {
+        return new Promise<{ start: Date, end: Date }>((resolve, reject) => {
             const tracesPath = path.join(robotDir, `${execNum}.exec`);
             return Promise.all([
                 this.firstLine(tracesPath),
@@ -56,7 +58,7 @@ export class ReaderLogService {
                             end: dates.end.toDate(),
                         });
                     }
-                });
+                }, (error) => reject(error));
         });
     }
 

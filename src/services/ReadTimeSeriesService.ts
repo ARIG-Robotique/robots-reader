@@ -14,8 +14,11 @@ export class ReadTimeSeriesService {
      * @param onData
      */
     readTimeseries(dir: string, url: string, onData: (item: any, readStream: ReadStream) => void): Promise<any> {
+        const timeseriesPath = path.join(dir, url);
+
+        console.log(`Read timeseries file ${timeseriesPath}`);
+
         return new Promise((resolve) => {
-            const timeseriesPath = path.join(dir, url);
 
             fs.access(timeseriesPath, (err) => {
                 if (err) {
