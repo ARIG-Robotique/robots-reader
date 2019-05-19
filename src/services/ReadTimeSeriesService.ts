@@ -6,12 +6,12 @@ const fs = require('fs');
 const StreamArray = require('stream-json/utils/StreamArray');
 
 export class ReadTimeSeriesService {
+
     /**
      * Lecture d'un fichier timeseries en stream
-     * @param {object} robot
-     * @param {string} exec
-     * @param {function} onData appelé pour chaque objet du fichier
-     * @returns {Promise}
+     * @param dir
+     * @param url
+     * @param onData
      */
     readTimeseries(dir: string, url: string, onData: (item: any, readStream: ReadStream) => void): Promise<any> {
         return new Promise((resolve) => {
@@ -19,7 +19,7 @@ export class ReadTimeSeriesService {
 
             fs.access(timeseriesPath, (err) => {
                 if (err) {
-                    console.log(`${timeseriesPath} does not exists`);
+                    console.error(`${timeseriesPath} does not exists`);
                     resolve();
                 }
 
@@ -52,11 +52,10 @@ export class ReadTimeSeriesService {
     }
 
     /**
-     * Lecture d'un fichier timeseries en batch de 100 objets
-     * @param {object} robot
-     * @param {string} exec
-     * @param {function} onData appelé pour chaque groupe de 100 objets du fichier
-     * @returns {Promise}
+     * Lire le fichier *-timeseries.json en batch de 100 lignes.
+     * @param dir
+     * @param exec
+     * @param onData
      */
     readTimeseriesBatch(dir: string, exec: string, onData: (items: any[]) => Promise<any>) {
         const url = `${exec}-timeseries.json`;
@@ -74,9 +73,10 @@ export class ReadTimeSeriesService {
                 onData(items.slice(0))
                     .then(() => {
                         stream && stream.resume();
-                    }, (err) => {
+                    }, (err: Error) => {
                         stream.destroy();
-                        return Promise.reject(err);
+                        console.error(`Error while processing file ${dir} ${url} with error : ${err.stack}`);
+                        return Promise.resolve();
                     });
 
                 items.length = 0;

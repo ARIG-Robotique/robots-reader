@@ -122,13 +122,13 @@ export class ExecsService {
 
                 Promise.all(promises).then(() => {
                     stream && stream.resume();
-                }, (err) => {
+                }, (err: Error) => {
                     stream && stream.destroy();
-                    reject(err);
+                    console.warn(`Error while processing mouvement file for ${robot.id} ${robot.name} with error ${err.stack}`);
+                    resolve();
                 });
             })
-                .then((result) => resolve(result))
-                .catch((error) => reject(error));
+                .then((result) => resolve(result));
         });
     }
 
@@ -163,7 +163,7 @@ export class ExecsService {
     }
 
     public loadLog(robot: Robot, execNum: string): Promise<void> {
-        console.info(`Read log for ${robot.id}`);
+        console.info(`Read log for ${robot.id} ${robot.name}`);
 
         return this.create(robot, execNum)
             .then((savedExecs) => {
@@ -179,17 +179,19 @@ export class ExecsService {
     public importLogsForRobot(robotId: number): Promise<void> {
         console.log(`Import logs for robot ${robotId}`);
 
-        return Promise.resolve(Robot.findByPk(robotId)
-            .then((robot: Robot) => {
-                console.log(`Read log in dir ${robot.dir}`);
+        return Promise.resolve(
+            Robot.findByPk(robotId)
+                .then((robot: Robot) => {
+                    console.log(`Read log in dir ${robot.dir}`);
 
-                return this.listExecs(robot.dir)
-                    .then((execsNum) => {
-                        console.log(`Optimized Execsnum ${execsNum}`);
-                        return [robot, execsNum];
-                    }, (error) => Promise.reject(error));
-            })
-            .then(([robot, execsNum]: [Robot, string[]]) => this.importLogs(robot, execsNum)));
+                    return this.listExecs(robot.dir)
+                        .then((execsNum) => {
+                            console.log(`Optimized Execsnum ${execsNum}`);
+                            return [robot, execsNum];
+                        }, (error) => Promise.reject(error));
+                })
+                .then(([robot, execsNum]: [Robot, string[]]) => this.importLogs(robot, execsNum))
+        );
     }
 
     private listExecs(dir: string): Promise<string[]> {

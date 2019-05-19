@@ -84,7 +84,7 @@ export class ReaderLogService {
         return new Promise((resolve, reject) => {
             fs.access(tracesPath, (err) => {
                 if (err) {
-                    console.log('Log file does not exists');
+                    console.error('Log file does not exists');
                     resolve();
                 }
 
@@ -111,7 +111,10 @@ export class ReaderLogService {
                     resolve();
                 });
 
-                stream.on('error', (error) => reject(error));
+                stream.on('error', (error) => {
+                    console.error(`Error while reading log ${tracesPath}`);
+                    resolve();
+                });
             });
         });
     }
@@ -139,8 +142,10 @@ export class ReaderLogService {
     }
 
     /**
-     * Lecture d'un fichier de log en batch de 20 lignes
-     * @param {function} onData appellée pour chaque groupe de 200 lignes de log
+     * Lecture d'un fichier de log en batch de 200 lignes
+     * @param robotDir
+     * @param execName
+     * @param onData
      */
     readLogBatch(robotDir: string, execName: string, onData: (items: object[]) => Promise<any>) {
         let items = [];
@@ -153,9 +158,11 @@ export class ReaderLogService {
                 onData(items.slice(0))
                     .then(() => {
                         stream.resume();
-                    }, (err) => {
+                    }, (err: Error) => {
                         stream.close();
-                        return Promise.reject(err);
+
+                        console.error(`Error while processing log ${robotDir} ${execName} with error : ${err.stack}`);
+                        return Promise.resolve();
                     });
                 items.length = 0;
             }
