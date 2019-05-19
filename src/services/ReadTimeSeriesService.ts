@@ -24,6 +24,7 @@ export class ReadTimeSeriesService {
                 if (err) {
                     console.error(`${timeseriesPath} does not exists`);
                     resolve();
+                    return;
                 }
 
                 const stream = StreamArray.make();

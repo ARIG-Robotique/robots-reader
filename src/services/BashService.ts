@@ -34,7 +34,7 @@ export class BashService {
 
                     console.log(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${this.conf.logsOutput}`);
 
-                    child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput], {
+                    child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput, robot.login, robot.pwd], {
                         stdio: 'inherit',
                         cwd: process.cwd()
                     })
