@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "migratedb": "cd flyway-4.2.0 && ./flyway migrate",
+    "migratedb": "yarn sequelize db:migrate",
     "build": "tsc && cp src/conf.prod.json dist/conf.json && cp -r scripts dist",
     "dev": "ts-node ./src/server.ts",
     "start": "nodemon ./dist/server.js",
