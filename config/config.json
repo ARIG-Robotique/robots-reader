@@ -1,0 +1,18 @@
+{
+  "development": {
+    "host": "localhost",
+    "port": 5432,
+    "username": "arig",
+    "password": "arig",
+    "database": "robots",
+    "dialect": "postgres"
+  },
+  "production": {
+    "host": "pg",
+    "port": 5432,
+    "username": "arig",
+    "password": "arig",
+    "database": "robots",
+    "dialect": "postgres"
+  }
+}

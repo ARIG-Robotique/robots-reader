@@ -20,6 +20,12 @@ export class Robot extends Model<Robot> {
     @Column
     simulateur: boolean;
 
+    @Column
+    login: string;
+
+    @Column
+    pwd: string;
+
     @CreatedAt
     creationDate: Date;
 

@@ -25,7 +25,9 @@ export class RobotService {
             host: robot.host,
             name: robot.name,
             simulateur: robot.simulateur,
-            dir: robot.dir
+            dir: robot.dir,
+            login: robot.login,
+            pwd: robot.pwd
         }, {where: {id: id}}));
     }
 
