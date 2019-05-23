@@ -77,15 +77,12 @@ export class ExecsService {
 
     public insertLog(robotDir, exec: Execs): Promise<any> {
         console.info(`Insert log to postgres for ${robotDir} and ${exec.numberExec}`);
-
         return this.readerLogService.readLogBatch(robotDir, exec.numberExec, (items) => {
-            if (items) {
-                return Promise.all(items.map(item => {
-                    return this.logMapper(item, exec.id).save();
-                }));
-            } else {
-                return Promise.resolve();
-            }
+            const logs: Log[] = items.map(item => this.logMapper(item, exec.id));
+            return Promise.resolve(Log.bulkCreate(logs));
+            // return Promise.all(items.map(item => {
+            //     return this.logMapper(item, exec.id).save();
+            // }));
         });
     }
 
