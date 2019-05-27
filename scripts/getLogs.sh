@@ -11,7 +11,7 @@ mkdir -p $LOG_DIR
 
 echo "Récupération logs ..."
 
-sshpass -p $PWD scp $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/* $LOG_DIR
+sshpass -p $PWD scp -r $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/* $LOG_DIR
 
 echo "Suppression des logs du robots ..."
 sshpass -p $PWD ssh $LOGIN@$ROBOT_HOST sudo rm -Rvf /home/pi/$1/logs/*
