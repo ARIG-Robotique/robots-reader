@@ -4,14 +4,20 @@ import * as firstLine from 'first-line';
 import * as lastLine from 'last-line';
 import moment = require("moment");
 import LineByLineReader = require("line-by-line");
+import {Inject, Singleton} from "typescript-ioc";
+import {Logger} from "./Logger";
 
+@Singleton
 export class ReaderLogService {
+
+    @Inject
+    private log: Logger;
 
     firstLine(path: string) {
         return new Promise((resolve, reject) => {
             firstLine(path, (err: Error, line) => {
                 if (err) {
-                    console.error(`Error while reading first line ${err.stack}`);
+                    this.log.error(`Error while reading first line ${err.stack}`);
                     reject(err);
                 } else {
                     resolve(line);
@@ -24,7 +30,7 @@ export class ReaderLogService {
         return new Promise((resolve, reject) => {
             lastLine(path, (err: Error, line) => {
                 if (err) {
-                    console.error(`Error while reading last line ${err.message}`);
+                    this.log.error(`Error while reading last line ${err.message}`);
                     reject(err);
                 } else {
                     resolve(line);
@@ -49,7 +55,7 @@ export class ReaderLogService {
                         end: this.parseLineDate(res[1])
                     };
 
-                    console.log(`Dates validity ${dates.start} ${dates.start.isValid()} && ${dates.end.isValid()}`);
+                    this.log.info(`Dates validity ${dates.start} ${dates.start.isValid()} && ${dates.end.isValid()}`);
                     if (!dates.start.isValid() || !dates.end.isValid()) {
                         reject('Cannot parse dates');
                     } else {
@@ -58,7 +64,7 @@ export class ReaderLogService {
                             end: dates.end.toDate(),
                         });
                     }
-                }, (error) => reject(error));
+                }, reject);
         });
     }
 
@@ -80,13 +86,13 @@ export class ReaderLogService {
      * @returns {Promise}
      */
     readLog(robotDir: string, execNum: string, onData) {
-        console.log(`readlog ${robotDir} ${execNum}`);
+        this.log.info(`readlog ${robotDir} ${execNum}`);
         const tracesPath = path.join(robotDir, `${execNum}-traces.log`);
 
         return new Promise((resolve, reject) => {
             fs.access(tracesPath, (err) => {
                 if (err) {
-                    console.error('Log file does not exists');
+                    this.log.warn('Log file does not exists');
                     resolve();
                 }
 
@@ -109,12 +115,12 @@ export class ReaderLogService {
                     if (current) {
                         onData(current, stream);
                     }
-                    console.log('readLog finished');
+                    this.log.info('readLog finished');
                     resolve();
                 });
 
                 stream.on('error', (error: Error) => {
-                    console.error(`Error while reading log ${tracesPath} with error : ${error.stack}`);
+                    this.log.error(`Error while reading log ${tracesPath} with error : ${error.stack}`);
                     resolve();
                 });
             });
@@ -138,7 +144,7 @@ export class ReaderLogService {
                 message: matches[5]
             };
         } else {
-            console.warn(`Not a log line: ${line}`);
+            this.log.warn(`Not a log line: ${line}`);
             return null;
         }
     }
@@ -163,7 +169,7 @@ export class ReaderLogService {
                     }, (err: Error) => {
                         stream.close();
 
-                        console.error(`Error while processing log ${robotDir} ${execName} with error : ${err.stack}`);
+                        this.log.error(`Error while processing log ${robotDir} ${execName} with error : ${err.stack}`);
                         return Promise.resolve();
                     });
                 items.length = 0;

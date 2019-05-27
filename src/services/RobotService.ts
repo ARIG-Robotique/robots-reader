@@ -1,15 +1,16 @@
 import {Robot} from '../models/Robot';
 import {ExecsService} from './ExecsService';
-import {Inject} from 'typescript-ioc';
+import {Inject, Singleton} from 'typescript-ioc';
 import {ExecsDTO} from '../dto/ExecsDTO';
 import {RobotDTO} from '../dto/RobotDTO';
-import {Execs} from '../models/Execs';
 
+@Singleton
 export class RobotService {
-    @Inject
-    private execsService: ExecsService;
 
     private conf = require('../conf.json');
+
+    @Inject
+    private execsService: ExecsService;
 
     constructor() {
     }
@@ -45,43 +46,27 @@ export class RobotService {
         return Promise.resolve(Robot.findByPk(id));
     }
 
-    public loadRobotFullInfos(id: number): Promise<RobotDTO> {
-
-        return new Promise((resolve, reject) => {
-            Promise.all([
-                this.findById(id),
-                this.execsService.findAllExecsByRobotId(id)
-            ])
-                .then((result) => {
-                    const robot: Robot = result[0];
-                    const execs: Execs[] = result[1];
-
-                    const robotDTO: RobotDTO = new RobotDTO(robot);
-                    robotDTO.execs = execs.map(exec => new ExecsDTO(exec));
-
-                    resolve(robotDTO);
-                })
-                .catch((error) => reject(error));
-        });
+    public loadRobotFullInfos(robotId: number): Promise<RobotDTO> {
+        return Promise.all([
+            this.findById(robotId),
+            this.execsService.findAllExecsByRobotId(robotId)
+        ])
+            .then(([robot, execs]) => {
+                const robotDTO = new RobotDTO(robot);
+                robotDTO.execs = execs.map(exec => new ExecsDTO(exec));
+                return robotDTO;
+            });
     }
 
     public delete(robotId: number): Promise<void> {
         return Promise.all([
-            Robot.findByPk(robotId),
+            this.findById(robotId),
             this.execsService.findAllExecsByRobotId(robotId)
         ])
-            .then(result => {
-                const robot: Robot = result[0];
-                const execs: Execs[] = result[1];
-
-                const promise = [];
-
-                execs.forEach(exec => promise.push(this.execsService.delete(exec.id)));
-
-                return Promise.all(promise)
-                    .then(() => {
-                        return robot.destroy();
-                    }, (error) => Promise.reject(error))
+            .then(([robot, execs]) => {
+                const deleteExecs = execs.map(exec => this.execsService.delete(exec.id));
+                return Promise.all(deleteExecs)
+                    .then(() => robot.destroy())
             });
     }
 }

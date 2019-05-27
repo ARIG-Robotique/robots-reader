@@ -1,54 +1,52 @@
 import {RobotService} from './RobotService';
-import {Inject} from 'typescript-ioc';
+import {Inject, Singleton} from 'typescript-ioc';
 import {Robot} from '../models/Robot';
 import * as child from 'child_process';
+import {Logger} from "./Logger";
 
-
+@Singleton
 export class BashService {
     readonly GET_LOGS_SH = './scripts/getLogs.sh';
 
-    @Inject
-    private robotService: RobotService;
-
     private conf = require('../conf.json');
 
+    @Inject
+    private robotService: RobotService;
+    @Inject
+    private log: Logger;
+
     public copyAllLog(robotsId: number[]): Promise<void> {
-        const promises = [];
+        this.log.info(`Copy logs for robots ${robotsId}`);
 
-        console.log(`Copy logs for robots ${robotsId}`);
+        const copyLogs = robotsId.map((robotId: number) => this.copyRobotLogs(robotId));
 
-        robotsId.forEach((robotId: number) => {
-            promises.push(this.copyRobotLogs(robotId));
-        });
-
-        return Promise.all(promises)
-            .then(() => Promise.resolve(),
-                () => Promise.reject());
+        return Promise.all(copyLogs)
+            .then(() => undefined);
     }
 
     private copyRobotLogs(robotId: number): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.robotService.findById(robotId)
-                .then((robot: Robot) => {
-                    const host = robot.host.split(':')[0];
+        return this.robotService.findById(robotId)
+            .then((robot: Robot) => {
+                const host = robot.host.split(':')[0];
 
-                    console.log(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${this.conf.logsOutput}`);
+                this.log.info(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${this.conf.logsOutput}`);
 
+                return new Promise((resolve, reject) => {
                     child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput, robot.login, robot.pwd], {
                         stdio: 'inherit',
                         cwd: process.cwd()
                     })
                         .on('close', (code) => {
                             if (code === 0) {
-                                console.log(`Finished copy logs for robot ${robotId}`);
+                                this.log.info(`Finished copy logs for robot ${robotId}`);
                                 resolve();
                             } else {
-                                console.error(`Failed copy logs for robot ${robotId}`);
+                                this.log.error(`Failed copy logs for robot ${robotId}`);
                                 reject();
                             }
                         });
                 });
-        });
+            });
     }
 
 }

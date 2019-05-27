@@ -7,8 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migratedb": "yarn sequelize db:migrate",
     "build": "tsc && cp src/conf.prod.json dist/conf.json && cp -r scripts dist",
-    "dev": "ts-node ./src/server.ts",
-    "start": "nodemon ./dist/server.js",
+    "start": "ts-node ./src/server.ts",
     "prod": "npm run build && npm run start"
   },
   "author": "",
@@ -25,6 +24,7 @@
     "last-line": "0.0.3",
     "line-by-line": "^0.1.6",
     "lodash": "latest",
+    "log4js": "^3",
     "moment": "^2.18.1",
     "pg": "^7.7.1",
     "pg-promise": "^8.5.4",

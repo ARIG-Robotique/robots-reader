@@ -1,8 +1,9 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
+import express from 'express';
+import bodyParser from 'body-parser';
 import {Sequelize} from 'sequelize-typescript';
 import {Routes} from './routes/Routes';
-import * as cors from 'cors';
+import {InfluxDB} from "influx";
+import * as _ from "lodash";
 
 
 class App {
@@ -17,6 +18,7 @@ class App {
         this.route = new Routes();
         this.route.routes(this.app);
         this.postgresSetup();
+        this.influxDbSetup();
     }
 
     private config(): void {
@@ -57,10 +59,30 @@ class App {
                 this.sequelize.sync({force: false})
                     .then(() => {
                         console.log(`Database & tables created!`)
-                    }, (e) => {
+                    })
+                    .catch((e) => {
                         console.error(e);
                         this.syncDb();
                     }),
+            5000
+        );
+    }
+
+    private influxDbSetup(): void {
+        setTimeout(
+            () => {
+                const influx = new InfluxDB(this.conf.influx);
+                influx.getDatabaseNames()
+                    .then((names) => {
+                        if (!_.find(names, this.conf.influx.database)) {
+                            return influx.createDatabase(this.conf.influx.database);
+                        }
+                    })
+                    .catch((e) => {
+                        console.error(e);
+                        this.influxDbSetup();
+                    });
+            },
             5000
         );
     }

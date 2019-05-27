@@ -1,11 +1,17 @@
 import {ReadStream} from "fs";
+import {Inject, Singleton} from "typescript-ioc";
+import {Logger} from "./Logger";
 
 const Promise = require('promise');
 const path = require('path');
 const fs = require('fs');
 const StreamArray = require('stream-json/utils/StreamArray');
 
+@Singleton
 export class ReadTimeSeriesService {
+
+    @Inject
+    private log: Logger;
 
     /**
      * Lecture d'un fichier timeseries en stream
@@ -16,13 +22,13 @@ export class ReadTimeSeriesService {
     readTimeseries(dir: string, url: string, onData: (item: any, readStream: ReadStream) => void): Promise<any> {
         const timeseriesPath = path.join(dir, url);
 
-        console.log(`Read timeseries file ${timeseriesPath}`);
+        this.log.info(`Read timeseries file ${timeseriesPath}`);
 
         return new Promise((resolve) => {
 
             fs.access(timeseriesPath, (err) => {
                 if (err) {
-                    console.error(`${timeseriesPath} does not exists`);
+                    this.log.warn(`${timeseriesPath} does not exists`);
                     resolve();
                     return;
                 }
@@ -79,7 +85,7 @@ export class ReadTimeSeriesService {
                         stream && stream.resume();
                     }, (err: Error) => {
                         stream.destroy();
-                        console.error(`Error while processing file ${dir} ${url} with error : ${err.stack}`);
+                        this.log.error(`Error while processing file ${dir} ${url} with error : ${err.stack}`);
                         return Promise.resolve();
                     });
 
