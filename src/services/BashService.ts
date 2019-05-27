@@ -1,7 +1,7 @@
 import {RobotService} from './RobotService';
 import {Inject, Singleton} from 'typescript-ioc';
 import {Robot} from '../models/Robot';
-import * as child from 'child_process';
+import child from 'child_process';
 import {Logger} from "./Logger";
 
 @Singleton

@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import {Sequelize} from 'sequelize-typescript';
 import {Routes} from './routes/Routes';
 import {InfluxDB} from "influx";
-import * as _ from "lodash";
+import _ from "lodash";
 
 
 class App {

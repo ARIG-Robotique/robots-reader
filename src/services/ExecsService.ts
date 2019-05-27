@@ -4,13 +4,13 @@ import {ReaderLogService} from './ReaderLogService';
 import {RobotService} from './RobotService';
 import {Log} from '../models/Log';
 import {InfluxDB} from 'influx';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {Inject, Singleton} from 'typescript-ioc';
 import {Mouvement} from '../models/Mouvement';
 import {MouvementData} from '../dto/MouvementData';
 import {ReadTimeSeriesService} from './ReadTimeSeriesService';
 import {Logger} from "./Logger";
-import * as fs from 'fs';
+import fs from 'fs';
 
 @Singleton
 export class ExecsService {
@@ -20,8 +20,6 @@ export class ExecsService {
 
     @Inject
     private readerLogService: ReaderLogService;
-    @Inject
-    private robotService: RobotService;
     @Inject
     private influxService: ReadTimeSeriesService;
     @Inject
@@ -171,7 +169,7 @@ export class ExecsService {
     public importLogsForRobot(robotId: number): Promise<void> {
         this.log.info(`Import logs for robot ${robotId}`);
 
-        return this.robotService.findById(robotId)
+        return Promise.resolve(Robot.findByPk(robotId))
             .then((robot: Robot) => {
                 this.log.info(`Read log in dir ${robot.dir}`);
 

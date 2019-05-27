@@ -1,7 +1,7 @@
-import * as path from "path";
-import * as fs from "fs";
-import * as firstLine from 'first-line';
-import * as lastLine from 'last-line';
+import path from "path";
+import fs from "fs";
+import firstLine from 'first-line';
+import lastLine from 'last-line';
 import moment = require("moment");
 import LineByLineReader = require("line-by-line");
 import {Inject, Singleton} from "typescript-ioc";
