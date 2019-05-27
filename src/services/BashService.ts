@@ -24,7 +24,7 @@ export class BashService {
             .then(() => undefined);
     }
 
-    private copyRobotLogs(robotId: number): Promise<void> {
+    private copyRobotLogs(robotId: number): Promise<any> {
         return this.robotService.findById(robotId)
             .then((robot: Robot) => {
                 const host = robot.host.split(':')[0];

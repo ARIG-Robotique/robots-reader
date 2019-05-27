@@ -1,7 +1,6 @@
 import {Execs} from '../models/Execs';
 import {Robot} from '../models/Robot';
 import {ReaderLogService} from './ReaderLogService';
-import {RobotService} from './RobotService';
 import {Log} from '../models/Log';
 import {InfluxDB} from 'influx';
 import _ from 'lodash';
