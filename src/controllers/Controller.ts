@@ -26,7 +26,9 @@ export class Controller {
             host: req.body.host,
             name: req.body.name,
             dir: req.body.dir,
-            simulateur: req.body.simulateur
+            simulateur: req.body.simulateur,
+            login: req.body.login,
+            pwd: req.body.pwd
         });
 
         this.robotService.save(robot)
