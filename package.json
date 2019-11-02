@@ -32,7 +32,7 @@
     "reflect-metadata": "^0.1.12",
     "rmdir": "^1.2.0",
     "scp2": "^0.5.0",
-    "sequelize": "^4.42.0",
+    "sequelize": "^5.15.1",
     "sequelize-cli": "^5.4.0",
     "sequelize-typescript": "^0.6.6",
     "stream-json": "^0.4.2",
