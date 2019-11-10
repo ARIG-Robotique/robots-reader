@@ -66,8 +66,8 @@ export class Controller {
             );
     }
 
-    getRobotFullInfos(req: Request, res: Response) {
-        this.robotService.loadRobotFullInfos(req.params.id)
+    getRobotExecs(req: Request, res: Response) {
+        this.robotService.getRobotExecs(req.params.id)
             .then(
                 result => res.status(200).json(result),
                 (e: Error) => this.handleError(e, res)

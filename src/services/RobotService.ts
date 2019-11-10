@@ -2,7 +2,6 @@ import {Robot} from '../models/Robot';
 import {ExecsService} from './ExecsService';
 import {Inject, Singleton} from 'typescript-ioc';
 import {ExecsDTO} from '../dto/ExecsDTO';
-import {RobotDTO} from '../dto/RobotDTO';
 
 @Singleton
 export class RobotService {
@@ -46,15 +45,10 @@ export class RobotService {
         return Promise.resolve(Robot.findByPk(id));
     }
 
-    public loadRobotFullInfos(robotId: number): Promise<RobotDTO> {
-        return Promise.all([
-            this.findById(robotId),
-            this.execsService.findAllExecsByRobotId(robotId)
-        ])
-            .then(([robot, execs]) => {
-                const robotDTO = new RobotDTO(robot);
-                robotDTO.execs = execs.map(exec => new ExecsDTO(exec));
-                return robotDTO;
+    public getRobotExecs(robotId: number): Promise<ExecsDTO[]> {
+        return this.execsService.findAllExecsByRobotId(robotId)
+            .then((execs) => {
+                return execs.map(exec => new ExecsDTO(exec));
             });
     }
 

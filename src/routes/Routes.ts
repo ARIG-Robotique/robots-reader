@@ -29,19 +29,19 @@ export class Routes {
                 return this.robotController.deleteRobot(req, res);
             });
 
-        app.route('/robot/:id/full')
+        app.route('/robot/:id/execs')
             .get((req: Request, res: Response) => {
-                return this.robotController.getRobotFullInfos(req, res);
-            });
-
-        app.route('/robot/:id/copyLogs')
-            .get((req: Request, res: Response) => {
-                return this.robotController.copyAllLogs(req, res);
+                return this.robotController.getRobotExecs(req, res);
             });
 
         app.route('/exec/:id')
             .delete((req: Request, res: Response) => {
                 return this.robotController.deleteRobotExec(req, res);
+            });
+
+        app.route('/robot/:id/copyLogs')
+            .get((req: Request, res: Response) => {
+                return this.robotController.copyAllLogs(req, res);
             });
 
         app.route('/robot/:id/importLogs')
