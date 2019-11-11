@@ -94,6 +94,7 @@ export class ReaderLogService {
                 if (err) {
                     this.log.warn('Log file does not exists');
                     resolve();
+                    return;
                 }
 
                 const stream = new LineByLineReader(tracesPath);
