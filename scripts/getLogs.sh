@@ -10,7 +10,7 @@ echo "Création répertoire de stockage des logs du robot"
 mkdir -p $LOG_DIR
 
 echo "Récupération logs ..."
-
+#rsync -ratlz --rsh="/usr/bin/sshpass -p $PWD ssh -o StrictHostKeyChecking=no -l $LOGIN" $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/*  $LOG_DIR
 sshpass -p $PWD scp -rv $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/* $LOG_DIR
 
 echo "Suppression des logs du robots ..."
