@@ -1,5 +1,5 @@
 import {Robot} from '../models/Robot';
-import {ExecsService} from './ExecsService';
+import {ExecService} from './ExecService';
 import {Inject, Singleton} from 'typescript-ioc';
 import {ExecsDTO} from '../dto/ExecsDTO';
 
@@ -9,26 +9,28 @@ export class RobotService {
     private conf = require('../conf.json');
 
     @Inject
-    private execsService: ExecsService;
+    private execsService: ExecService;
 
     constructor() {
     }
 
-    public save(robot: Robot): Promise<Robot> {
+    save(robot: Robot): Promise<Robot> {
         this.setDir(robot);
         return Promise.resolve(robot.save());
     }
 
-    public update(id: number, robot: Robot): Promise<[number, Robot[]]> {
-        this.setDir(robot);
-        return Promise.resolve(Robot.update({
-            host: robot.host,
-            name: robot.name,
-            simulateur: robot.simulateur,
-            dir: robot.dir,
-            login: robot.login,
-            pwd: robot.pwd
-        }, {where: {id: id}}));
+    update(id: number, robot: any): Promise<Robot> {
+        return Promise.resolve(Robot.findByPk(id)
+            .then(savedRobot => {
+                savedRobot.host = robot.host;
+                savedRobot.name = robot.name;
+                savedRobot.simulateur = robot.simulateur;
+                savedRobot.dir = robot.dir;
+                savedRobot.login = robot.login;
+                savedRobot.pwd = robot.pwd;
+                this.setDir(savedRobot);
+                return savedRobot.save();
+            }));
     }
 
     private setDir(robot: Robot) {
@@ -37,25 +39,25 @@ export class RobotService {
         }
     }
 
-    public findAll(): Promise<Robot[]> {
+    findAll(): Promise<Robot[]> {
         return Promise.resolve(Robot.findAll());
     }
 
-    public findById(id: number): Promise<Robot> {
+    findById(id: number): Promise<Robot> {
         return Promise.resolve(Robot.findByPk(id));
     }
 
-    public getRobotExecs(robotId: number): Promise<ExecsDTO[]> {
-        return this.execsService.findAllExecsByRobotId(robotId)
+    getRobotExecs(idRobot: number): Promise<ExecsDTO[]> {
+        return this.execsService.findAllExecsByRobot(idRobot)
             .then((execs) => {
                 return execs.map(exec => new ExecsDTO(exec));
             });
     }
 
-    public delete(robotId: number): Promise<void> {
+    delete(idRobot: number): Promise<void> {
         return Promise.all([
-            this.findById(robotId),
-            this.execsService.findAllExecsByRobotId(robotId)
+            this.findById(idRobot),
+            this.execsService.findAllExecsByRobot(idRobot)
         ])
             .then(([robot, execs]) => {
                 const deleteExecs = execs.map(exec => this.execsService.delete(exec.id));

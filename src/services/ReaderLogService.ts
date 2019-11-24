@@ -1,11 +1,12 @@
-import path from "path";
-import fs from "fs";
+import path from 'path';
+import fs from 'fs';
+import readline, {Interface} from 'readline';
 import firstLine from 'first-line';
 import lastLine from 'last-line';
-import moment = require("moment");
-import LineByLineReader = require("line-by-line");
-import {Inject, Singleton} from "typescript-ioc";
-import {Logger} from "./Logger";
+import {Inject, Singleton} from 'typescript-ioc';
+import {isValid, parseISO} from 'date-fns';
+import {Logger} from './Logger';
+import {LogDTO} from '../dto/LogDTO';
 
 @Singleton
 export class ReaderLogService {
@@ -13,7 +14,7 @@ export class ReaderLogService {
     @Inject
     private log: Logger;
 
-    firstLine(path: string) {
+    firstLine(path: string): Promise<string> {
         return new Promise((resolve, reject) => {
             firstLine(path, (err: Error, line) => {
                 if (err) {
@@ -26,7 +27,7 @@ export class ReaderLogService {
         });
     }
 
-    lastLine(path: string) {
+    lastLine(path: string): Promise<string> {
         return new Promise((resolve, reject) => {
             lastLine(path, (err: Error, line) => {
                 if (err) {
@@ -42,9 +43,9 @@ export class ReaderLogService {
     /**
      * Retourne la date de début et la date de fin pour une execution
      */
-    getStartEnd(robotDir: string, execNum: string): Promise<{ start: Date, end: Date }> {
+    getStartEnd(robotDir: string, idExec: string): Promise<{ start: Date, end: Date }> {
         return new Promise<{ start: Date, end: Date }>((resolve, reject) => {
-            const tracesPath = path.join(robotDir, `${execNum}.exec`);
+            const tracesPath = path.join(robotDir, `${idExec}.exec`);
             return Promise.all([
                 this.firstLine(tracesPath),
                 this.lastLine(tracesPath)
@@ -52,16 +53,15 @@ export class ReaderLogService {
                 .then((res) => {
                     const dates = {
                         start: this.parseLineDate(res[0]),
-                        end: this.parseLineDate(res[1])
+                        end  : this.parseLineDate(res[1])
                     };
 
-                    this.log.info(`Dates validity ${dates.start} ${dates.start.isValid()} && ${dates.end.isValid()}`);
-                    if (!dates.start.isValid() || !dates.end.isValid()) {
+                    if (!isValid(dates.start) || !isValid(dates.end)) {
                         reject('Cannot parse dates');
                     } else {
                         resolve({
-                            start: dates.start.toDate(),
-                            end: dates.end.toDate(),
+                            start: dates.start,
+                            end  : dates.end,
                         });
                     }
                 }, reject);
@@ -70,24 +70,45 @@ export class ReaderLogService {
 
     /**
      * Récupère la date sur une ligne de log
-     * @todo meilleure implémentation
-     * @param {string} content
-     * @returns {moment}
      */
-    private parseLineDate(content) {
-        return moment(new Date(content.slice(0, 19)));
+    private parseLineDate(content: string): Date {
+        return parseISO(content.slice(0, 19));
+    }
+
+    /**
+     * Lecture d'un fichier de log en batch de 200 lignes
+     */
+    readLogBatch(robotDir: string, idExec: string, onData: (items: LogDTO[]) => Promise<unknown>): Promise<void> {
+        let items = [];
+
+        return this.readLog(robotDir, idExec, (item, stream) => {
+            items.push(item);
+
+            if (items.length >= 200) {
+                stream.pause();
+
+                onData(items.slice(0))
+                    .then(() => {
+                        stream.resume();
+                    }, (err: Error) => {
+                        items.length = 0;
+                        stream.close();
+                        this.log.error(`Error while processing log ${robotDir} ${idExec} with error : ${err.stack}`);
+                    });
+
+                items.length = 0;
+            }
+        })
+            .then(() => onData(items))
+            .then(() => null);
     }
 
     /**
      * Lecture d'un fichier de log en stream
-     * @param {object} robotDir
-     * @param {string} execNum
-     * @param {function} onData appellée pour chaque ligne de log
-     * @returns {Promise}
      */
-    readLog(robotDir: string, execNum: string, onData) {
-        this.log.info(`readlog ${robotDir} ${execNum}`);
-        const tracesPath = path.join(robotDir, `${execNum}-traces.log`);
+    private readLog(robotDir: string, idExec: string, onData: (content: LogDTO, stream: Interface) => void): Promise<void> {
+        this.log.info(`readlog ${robotDir} ${idExec}`);
+        const tracesPath = path.join(robotDir, `${idExec}-traces.log`);
 
         return new Promise((resolve, reject) => {
             fs.access(tracesPath, (err) => {
@@ -97,30 +118,33 @@ export class ReaderLogService {
                     return;
                 }
 
-                const stream = new LineByLineReader(tracesPath);
+                const fileStream = fs.createReadStream(tracesPath);
+                const lineStream = readline.createInterface({
+                    input: fileStream,
+                });
 
-                let current;
-                stream.on('line', (line) => {
+                let current: LogDTO;
+                lineStream.on('line', (line) => {
                     // vérifie que la ligne commence par une date
                     if (line.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}/)) {
                         if (current) {
-                            onData(current, stream);
+                            onData(current, lineStream);
                         }
                         current = this.parseLog(line);
-                        current.idexec = execNum;
                     } else if (current) {
                         current.message += '\n' + line;
                     }
                 });
-                stream.on('end', () => {
+
+                lineStream.on('close', () => {
                     if (current) {
-                        onData(current, stream);
+                        onData(current, lineStream);
                     }
                     this.log.info('readLog finished');
                     resolve();
                 });
 
-                stream.on('error', (error: Error) => {
+                fileStream.on('error', (error: Error) => {
                     this.log.error(`Error while reading log ${tracesPath} with error : ${error.stack}`);
                     resolve();
                 });
@@ -130,54 +154,21 @@ export class ReaderLogService {
 
     /**
      * Parse une ligne de log CSV
-     * @param {string} line
-     * @returns {object}
      */
-    parseLog(line) {
+    private parseLog(line: string): LogDTO {
         let matches = line.match(/^([^;]+);([^;]+);([^;]+);([^;]+);(.*)$/);
 
         if (matches) {
             return {
-                date: moment(matches[1]).toDate(),
-                level: matches[2],
-                thread: matches[3],
-                class: matches[4],
+                date   : parseISO(matches[1]),
+                level  : matches[2],
+                thread : matches[3],
+                clazz  : matches[4],
                 message: matches[5]
             };
         } else {
             this.log.warn(`Not a log line: ${line}`);
             return null;
         }
-    }
-
-    /**
-     * Lecture d'un fichier de log en batch de 200 lignes
-     * @param robotDir
-     * @param execName
-     * @param onData
-     */
-    readLogBatch(robotDir: string, execName: string, onData: (items: object[]) => Promise<any>) {
-        let items = [];
-
-        return this.readLog(robotDir, execName, (item, stream) => {
-            items.push(item);
-
-            if (items.length >= 200) {
-                stream.pause();
-                onData(items.slice(0))
-                    .then(() => {
-                        stream.resume();
-                    }, (err: Error) => {
-                        stream.close();
-
-                        this.log.error(`Error while processing log ${robotDir} ${execName} with error : ${err.stack}`);
-                        return Promise.resolve();
-                    });
-                items.length = 0;
-            }
-        })
-            .then(() => {
-                return onData(items);
-            });
     }
 }

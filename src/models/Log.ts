@@ -1,5 +1,6 @@
 import {AutoIncrement, Column, DataType, ForeignKey, Model, PrimaryKey, Table} from "sequelize-typescript";
-import {Execs} from "./Execs";
+import {Exec} from "./Exec";
+import {LogDTO} from '../dto/LogDTO';
 
 @Table
 export class Log extends Model<Log> {
@@ -8,9 +9,9 @@ export class Log extends Model<Log> {
     @Column
     id: number;
 
-    @ForeignKey(() => Execs)
+    @ForeignKey(() => Exec)
     @Column
-    idExecs: number;
+    idExec: string;
 
     @Column
     date: Date;
@@ -29,6 +30,14 @@ export class Log extends Model<Log> {
     })
     message: string;
 
-    @Column
-    idExec: string;
+    static fromData(item: LogDTO, idExec: string): Log {
+        const log = new Log();
+        log.clazz = item.clazz;
+        log.date = item.date;
+        log.level = item.level;
+        log.thread = item.thread;
+        log.message = item.message;
+        log.idExec = idExec;
+        return log;
+    }
 }

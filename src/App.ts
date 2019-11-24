@@ -2,9 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import {Sequelize} from 'sequelize-typescript';
 import {Routes} from './routes/Routes';
-import {InfluxDB} from "influx";
-import _ from "lodash";
-
+import {InfluxDB} from 'influx';
+import {find} from 'lodash';
 
 class App {
     public app: express.Application;
@@ -35,19 +34,15 @@ class App {
 
     private postgresSetup(): void {
         this.sequelize = new Sequelize({
-            name: this.conf.pg.database,
-            dialect: this.conf.pg.dialect,
-            host: this.conf.pg.host,
-            port: this.conf.pg.port,
-            username: this.conf.pg.user,
-            password: this.conf.pg.password,
+            database  : this.conf.pg.database,
+            dialect   : this.conf.pg.dialect,
+            host      : this.conf.pg.host,
+            port      : this.conf.pg.port,
+            username  : this.conf.pg.user,
+            password  : this.conf.pg.password,
             modelPaths: [
                 __dirname + '/models'
-            ]
-            // ],
-            // define: {
-            //     schema: 'robots'
-            // }
+            ],
         });
 
         this.syncDb();
@@ -74,7 +69,7 @@ class App {
                 const influx = new InfluxDB(this.conf.influx);
                 influx.getDatabaseNames()
                     .then((names) => {
-                        if (!_.find(names, this.conf.influx.database)) {
+                        if (!find(names, this.conf.influx.database)) {
                             return influx.createDatabase(this.conf.influx.database);
                         }
                     })

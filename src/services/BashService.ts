@@ -2,7 +2,7 @@ import {RobotService} from './RobotService';
 import {Inject, Singleton} from 'typescript-ioc';
 import {Robot} from '../models/Robot';
 import child from 'child_process';
-import {Logger} from "./Logger";
+import {Logger} from './Logger';
 
 @Singleton
 export class BashService {
@@ -15,16 +15,9 @@ export class BashService {
     @Inject
     private log: Logger;
 
-    public copyAllLog(robotsId: number[]): Promise<void> {
-        this.log.info(`Copy logs for robots ${robotsId}`);
+    copyAllLog(robotId: number): Promise<void> {
+        this.log.info(`Copy logs for robot ${robotId}`);
 
-        const copyLogs = robotsId.map((robotId: number) => this.copyRobotLogs(robotId));
-
-        return Promise.all(copyLogs)
-            .then(() => undefined);
-    }
-
-    private copyRobotLogs(robotId: number): Promise<any> {
         return this.robotService.findById(robotId)
             .then((robot: Robot) => {
                 const host = robot.host.split(':')[0];
@@ -34,7 +27,7 @@ export class BashService {
                 return new Promise((resolve, reject) => {
                     child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput, robot.login, robot.pwd], {
                         stdio: 'inherit',
-                        cwd: process.cwd()
+                        cwd  : process.cwd()
                     })
                         .on('close', (code) => {
                             if (code === 0) {

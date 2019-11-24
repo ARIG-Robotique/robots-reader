@@ -1,15 +1,13 @@
-import {Execs} from "../models/Execs";
+import {Exec} from '../models/Exec';
 
 export class ExecsDTO {
-    id: number;
+    id: string;
     dateStart: Date;
     dateEnd: Date;
-    numberExec: string;
 
-    constructor(exec?: Execs) {
+    constructor(exec?: Exec) {
         this.id = exec.id;
         this.dateStart = exec.dateStart;
         this.dateEnd = exec.dateEnd;
-        this.numberExec  = exec.numberExec;
     }
 }
