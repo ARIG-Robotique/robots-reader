@@ -67,19 +67,17 @@ export class ReadTimeSeriesService {
                     return;
                 }
 
-                const stream = StreamArray.make();
                 const fileStream: ReadStream = fs.createReadStream(timeseriesPath);
+                const stream = fileStream.pipe(StreamArray.withParser());
 
-                stream.output.on('data', (item) => {
+                stream.on('data', (item) => {
                     onData(item.value, fileStream);
                 });
 
-                stream.output.on('end', () => {
+                stream.on('end', () => {
                     fileStream.close();
                     resolve();
                 });
-
-                fileStream.pipe(stream.input);
             });
         });
     }

@@ -14,6 +14,9 @@ export class ReaderLogService {
     @Inject
     private log: Logger;
 
+    // NB: first-line renvoie un buffer, last-line renvoie une string
+    // les joies des micro packages
+
     firstLine(path: string): Promise<string> {
         return new Promise((resolve, reject) => {
             firstLine(path, (err: Error, line) => {
@@ -21,7 +24,7 @@ export class ReaderLogService {
                     this.log.error(`Error while reading first line ${err.stack}`);
                     reject(err);
                 } else {
-                    resolve(line);
+                    resolve(line.toString());
                 }
             });
         });
