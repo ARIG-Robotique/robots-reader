@@ -1,4 +1,5 @@
 import express from 'express';
+import expressWs, {Application} from 'express-ws';
 import bodyParser from 'body-parser';
 import {Sequelize} from 'sequelize-typescript';
 import {Routes} from './routes/Routes';
@@ -6,13 +7,13 @@ import {InfluxDB} from 'influx';
 import {find} from 'lodash';
 
 class App {
-    public app: express.Application;
+    public app: Application;
     public route: Routes;
     public sequelize: Sequelize;
     private conf = require('./conf.json');
 
     constructor() {
-        this.app = express();
+        this.app = express() as any;
         this.config();
         this.route = new Routes();
         this.route.routes(this.app);
@@ -30,6 +31,7 @@ class App {
             res.header('Access-Control-Allow-Credentials', 'true');
             next();
         });
+        expressWs(this.app);
     }
 
     private postgresSetup(): void {

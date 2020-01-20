@@ -1,6 +1,9 @@
 import {Request, Response} from 'express';
-import {Inject} from "typescript-ioc";
-import {Controller} from "../controllers/Controller";
+import {Inject} from 'typescript-ioc';
+import {Controller} from '../controllers/Controller';
+import {Application} from 'express-ws';
+import WebSocket from 'ws';
+import {WebSocketWrapper} from '../utils/WebSocketWrapper';
 
 export class Routes {
     @Inject
@@ -9,7 +12,7 @@ export class Routes {
     constructor() {
     }
 
-    routes(app) {
+    routes(app: Application) {
         app.route('/robot')
             .get((req: Request, res: Response) => {
                 return this.robotController.getAllRobot(req, res);
@@ -53,5 +56,15 @@ export class Routes {
             .get((req: Request, res: Response) => {
                 res.json({message: 'Hello world'});
             });
+
+        app.ws('/ws', (ws: WebSocket) => {
+            ws.on('message', (msg) => {
+                const message = JSON.parse(msg as string);
+
+                if (message.action === 'importLogs') {
+                    this.robotController.importLogsStream(message.data, new WebSocketWrapper(ws));
+                }
+            });
+        });
     }
 }

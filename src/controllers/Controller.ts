@@ -5,6 +5,7 @@ import {ExecService} from '../services/ExecService';
 import {BashService} from '../services/BashService';
 import {Inject} from 'typescript-ioc';
 import {Logger} from '../services/Logger';
+import {WebSocketWrapper} from '../utils/WebSocketWrapper';
 
 export class Controller {
     @Inject
@@ -83,11 +84,30 @@ export class Controller {
     }
 
     importLogs(req: Request, res: Response) {
-        const robotId = req.params.id;
-        this.execsService.importExecsForRobot(+robotId)
+        this.execsService.importExecsForRobot(+req.params.id)
             .then(
                 () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)
+            );
+    }
+
+    importLogsStream(req, ws: WebSocketWrapper) {
+        const logSubscription = this.log.observable.subscribe(log => {
+            ws.send('log', log);
+        });
+
+        this.bashService.copyAllLog(+req.idRobot)
+            .then(() => this.execsService.importExecsForRobot(+req.idRobot))
+            .then(
+                () => {
+                    logSubscription.unsubscribe();
+                    ws.send('importLogsDone');
+                },
+                (e: Error) => {
+                    this.log.error(e);
+                    logSubscription.unsubscribe();
+                    ws.send('importLogsError');
+                }
             );
     }
 

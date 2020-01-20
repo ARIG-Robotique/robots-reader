@@ -6,11 +6,9 @@ import {InfluxDB} from 'influx';
 import {extend} from 'lodash';
 import {Inject, Singleton} from 'typescript-ioc';
 import {Mouvement} from '../models/Mouvement';
-import {MouvementData} from '../dto/MouvementData';
 import {ReadTimeSeriesService} from './ReadTimeSeriesService';
 import {Logger} from './Logger';
 import fs from 'fs';
-import {LogDTO} from '../dto/LogDTO';
 
 @Singleton
 export class ExecService {
