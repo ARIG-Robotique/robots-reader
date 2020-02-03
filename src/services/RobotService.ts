@@ -35,7 +35,7 @@ export class RobotService {
 
     private setDir(robot: Robot) {
         if (!robot.simulateur) {
-            robot.dir = `${this.conf.logsOutput}/${robot.name}`;
+            robot.dir = `${this.conf.logsOutput}/${robot.id}`;
         }
     }
 
@@ -60,7 +60,7 @@ export class RobotService {
             this.execsService.findAllExecsByRobot(idRobot)
         ])
             .then(([robot, execs]) => {
-                const deleteExecs = execs.map(exec => this.execsService.delete(exec.id));
+                const deleteExecs = execs.map(exec => this.execsService.delete(idRobot, exec.id));
                 return Promise.all(deleteExecs)
                     .then(() => robot.destroy())
             });

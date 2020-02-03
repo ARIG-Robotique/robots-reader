@@ -21,7 +21,7 @@ export class Routes {
                 return this.robotController.addRobot(req, res);
             });
 
-        app.route('/robot/:id')
+        app.route('/robot/:idRobot')
             .put((req: Request, res: Response) => {
                 return this.robotController.updateRobot(req, res);
             })
@@ -32,22 +32,32 @@ export class Routes {
                 return this.robotController.deleteRobot(req, res);
             });
 
-        app.route('/robot/:id/execs')
+        app.route('/robot/:idRobot/execs')
             .get((req: Request, res: Response) => {
                 return this.robotController.getRobotExecs(req, res);
             });
 
-        app.route('/exec/:id')
+        app.route('/robot/:idRobot/execs/:idExec')
             .delete((req: Request, res: Response) => {
                 return this.robotController.deleteRobotExec(req, res);
             });
 
-        app.route('/robot/:id/copyLogs')
+        app.route('/robot/:idRobot/execs/:idExec/paths')
+            .get((req: Request, res: Response) => {
+                return this.robotController.getExecPaths(req, res);
+            });
+
+        app.route('/robot/:idRobot/execs/:idExec/paths/:file')
+            .get((req: Request, res: Response) => {
+                return this.robotController.getExecPathFile(req, res);
+            });
+
+        app.route('/robot/:idRobot/copyLogs')
             .get((req: Request, res: Response) => {
                 return this.robotController.copyAllLogs(req, res);
             });
 
-        app.route('/robot/:id/importLogs')
+        app.route('/robot/:idRobot/importLogs')
             .get((req: Request, res: Response) => {
                 return this.robotController.importLogs(req, res);
             });

@@ -41,16 +41,35 @@ export class ExecService {
             });
     }
 
-    delete(idExec: string): Promise<void> {
+    delete(idRobot: number, idExec: string): Promise<void> {
         return Promise.all([
             Exec.findByPk(idExec),
-            this.findAllMouvementByExec(idExec)
+            this.findAllMouvementByExec(idExec),
         ])
             .then(([exec, mouvements]) => {
                 const deleteMouvements = mouvements.map(mouvement => mouvement.destroy());
                 return Promise.all(deleteMouvements)
                     .then(() => exec.destroy());
             });
+    }
+
+    getPaths(idRobot: number, idExec: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            const path = `${this.conf.logsOutput}/${idRobot}/path/${idExec}`;
+
+            fs.readdir(path, (err, files) => {
+                if (err) {
+                    this.log.error(`Error while listing paths ${err.message}`);
+                    reject(err);
+                } else {
+                    resolve(files);
+                }
+            });
+        });
+    }
+
+    getPathFile(idRobot: number, idExec: string, file: string): Promise<string> {
+        return Promise.resolve(`${this.conf.logsOutput}/${idRobot}/path/${idExec}/${file}`);
     }
 
     private findAllMouvementByExec(idExec: string): Promise<Mouvement[]> {

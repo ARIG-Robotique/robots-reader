@@ -17,15 +17,12 @@ export class Logger {
 
     constructor() {
         const observableAppender: AppenderModule = {
-            configure: (config, layouts) => {
-
-                return (event: LoggingEvent) => {
-                    this.observable.next({
-                        level  : event.level.levelStr,
-                        time   : event.startTime,
-                        message: layouts.messagePassThroughLayout(event),
-                    });
-                };
+            configure: (config, layouts) => (event: LoggingEvent) => {
+                this.observable.next({
+                    level  : event.level.levelStr,
+                    time   : event.startTime,
+                    message: layouts.messagePassThroughLayout(event),
+                });
             }
         };
 

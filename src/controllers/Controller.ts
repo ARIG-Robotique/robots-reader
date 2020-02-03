@@ -40,10 +40,7 @@ export class Controller {
     }
 
     updateRobot(req: Request, res: Response) {
-        const id = req.params.id;
-        const robot = req.body;
-
-        this.robotService.update(+id, robot)
+        this.robotService.update(+req.params.idRobot, req.body)
             .then(
                 (result) => res.status(201).json(result),
                 (e: Error) => this.handleError(e, res)
@@ -60,7 +57,7 @@ export class Controller {
     }
 
     getRobot(req: Request, res: Response) {
-        this.robotService.findById(+req.params.id)
+        this.robotService.findById(+req.params.idRobot)
             .then(
                 result => res.status(200).json(result),
                 (e: Error) => this.handleError(e, res)
@@ -68,7 +65,7 @@ export class Controller {
     }
 
     getRobotExecs(req: Request, res: Response) {
-        this.robotService.getRobotExecs(+req.params.id)
+        this.robotService.getRobotExecs(+req.params.idRobot)
             .then(
                 result => res.status(200).json(result),
                 (e: Error) => this.handleError(e, res)
@@ -76,7 +73,7 @@ export class Controller {
     }
 
     copyAllLogs(req: Request, res: Response) {
-        this.bashService.copyAllLog(+req.params.id)
+        this.bashService.copyAllLog(+req.params.idRobot)
             .then(
                 () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)
@@ -84,7 +81,7 @@ export class Controller {
     }
 
     importLogs(req: Request, res: Response) {
-        this.execsService.importExecsForRobot(+req.params.id)
+        this.execsService.importExecsForRobot(+req.params.idRobot)
             .then(
                 () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)
@@ -112,17 +109,31 @@ export class Controller {
     }
 
     deleteRobotExec(req: Request, res: Response) {
-        const idExec = req.params.id;
-        this.execsService.delete(idExec)
+        this.execsService.delete(+req.params.idRobot, req.params.idExec)
             .then(
                 () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)
             );
     }
 
+    getExecPaths(req: Request, res: Response) {
+        this.execsService.getPaths(+req.params.idRobot, req.params.idExec)
+            .then(
+                result => res.status(200).json(result),
+                (e: Error) => this.handleError(e, res)
+            );
+    }
+
+    getExecPathFile(req: Request, res: Response) {
+        this.execsService.getPathFile(+req.params.idRobot, req.params.idExec, req.params.file)
+            .then(
+                result => res.sendFile(result, {root: '.'}),
+                (e: Error) => this.handleError(e, res)
+            );
+    }
+
     deleteRobot(req: Request, res: Response) {
-        const robotId = req.params.id;
-        this.robotService.delete(+robotId)
+        this.robotService.delete(+req.params.idRobot)
             .then(
                 () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)
