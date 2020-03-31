@@ -15,7 +15,7 @@ export class RobotService {
     }
 
     save(robot: Robot): Promise<Robot> {
-        this.setDir(robot);
+        this.setDir(robot); // FIXME : Top tôt l'id n'est pas encore connu
         return Promise.resolve(robot.save());
     }
 

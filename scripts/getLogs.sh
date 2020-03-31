@@ -14,7 +14,8 @@ echo "Récupération logs ..."
 sshpass -p $PWD scp -rv $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/* $LOG_DIR 2>&1
 
 if [[ $? != 0 ]]; then
-  exit 1
+  echo "Pas de log a copier"
+  exit 0
 fi
 
 echo "Suppression des logs du robots ..."
