@@ -1,11 +1,12 @@
-import {RobotService} from '../services/RobotService';
-import {Request, Response} from 'express';
-import {Robot} from '../models/Robot';
-import {ExecService} from '../services/ExecService';
-import {BashService} from '../services/BashService';
-import {Inject} from 'typescript-ioc';
-import {Logger} from '../services/Logger';
-import {WebSocketWrapper} from '../utils/WebSocketWrapper';
+import { Request, Response } from 'express';
+import { Inject } from 'typescript-ioc';
+import { ExecsDTO } from '../dto/ExecsDTO';
+import { Robot } from '../models/Robot';
+import { BashService } from '../services/BashService';
+import { ExecService } from '../services/ExecService';
+import { Logger } from '../services/Logger';
+import { RobotService } from '../services/RobotService';
+import { WebSocketWrapper } from '../utils/WebSocketWrapper';
 
 export class Controller {
     @Inject
@@ -65,7 +66,10 @@ export class Controller {
     }
 
     getRobotExecs(req: Request, res: Response) {
-        this.robotService.getRobotExecs(+req.params.idRobot)
+        this.execsService.findAllExecsByRobot(+req.params.idRobot)
+            .then((execs) => {
+                return execs.map(exec => new ExecsDTO(exec));
+            })
             .then(
                 result => res.status(200).json(result),
                 (e: Error) => this.handleError(e, res)
@@ -133,7 +137,13 @@ export class Controller {
     }
 
     deleteRobot(req: Request, res: Response) {
-        this.robotService.delete(+req.params.idRobot)
+        const idRobot = +req.params.idRobot;
+        this.execsService.findAllExecsByRobot(idRobot)
+            .then(execs => {
+                const deleteExecs = execs.map(exec => this.execsService.delete(idRobot, exec.id));
+                return Promise.all(deleteExecs)
+                    .then(() => this.robotService.delete(idRobot))
+            })
             .then(
                 () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)

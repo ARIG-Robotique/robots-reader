@@ -1,30 +1,34 @@
-import {Exec} from '../models/Exec';
-import {Robot} from '../models/Robot';
-import {ReaderLogService} from './ReaderLogService';
-import {Log} from '../models/Log';
-import {InfluxDB} from 'influx';
-import {extend} from 'lodash';
-import {Inject, Singleton} from 'typescript-ioc';
-import {Mouvement} from '../models/Mouvement';
-import {ReadTimeSeriesService} from './ReadTimeSeriesService';
-import {Logger} from './Logger';
 import fs from 'fs';
+import { InfluxDB } from 'influx';
+import { extend } from 'lodash';
+import { Inject, Singleton } from 'typescript-ioc';
+import { Exec } from '../models/Exec';
+import { Log } from '../models/Log';
+import { Mouvement } from '../models/Mouvement';
+import { Robot } from '../models/Robot';
+import { Config } from './Config';
+import { Logger } from './Logger';
+import { ReaderLogService } from './ReaderLogService';
+import { ReadTimeSeriesService } from './ReadTimeSeriesService';
+import { RobotService } from './RobotService';
 
 @Singleton
 export class ExecService {
-    private conf = require('../conf.json');
-
     private influx: InfluxDB;
 
+    @Inject
+    private config: Config;
     @Inject
     private readerLogService: ReaderLogService;
     @Inject
     private influxService: ReadTimeSeriesService;
     @Inject
+    private robotService: RobotService;
+    @Inject
     private log: Logger;
 
     constructor() {
-        this.influx = new InfluxDB(this.conf.influx);
+        this.influx = new InfluxDB(this.config.influx);
     }
 
     create(robot: Robot, idExec: string): Promise<Exec> {
@@ -53,9 +57,11 @@ export class ExecService {
             });
     }
 
-    getPaths(idRobot: number, idExec: string): Promise<string[]> {
+    async getPaths(idRobot: number, idExec: string): Promise<string[]> {
+        const dir = await this.robotService.getDir(idRobot);
+
         return new Promise((resolve, reject) => {
-            const path = `${this.conf.logsOutput}/${idRobot}/path/${idExec}`;
+            const path = `${dir}/path/${idExec}`;
 
             fs.readdir(path, (err, files) => {
                 if (err) {
@@ -68,8 +74,9 @@ export class ExecService {
         });
     }
 
-    getPathFile(idRobot: number, idExec: string, file: string): Promise<string> {
-        return Promise.resolve(`${this.conf.logsOutput}/${idRobot}/path/${idExec}/${file}`);
+    async getPathFile(idRobot: number, idExec: string, file: string): Promise<string> {
+        const dir = await this.robotService.getDir(idRobot);
+        return Promise.resolve(`${dir}/path/${idExec}/${file}`);
     }
 
     private findAllMouvementByExec(idExec: string): Promise<Mouvement[]> {
@@ -84,17 +91,17 @@ export class ExecService {
         }));
     }
 
-    private insertLog(robotDir: string, exec: Exec): Promise<unknown> {
-        this.log.info(`Insert log to postgres for ${robotDir} and ${exec.id}`);
+    private insertLog(robot: Robot, exec: Exec): Promise<unknown> {
+        this.log.info(`Insert log to postgres for ${robot.id} ${robot.name} and ${exec.id}`);
 
-        return this.readerLogService.readLogBatch(robotDir, exec.id, (items) => {
+        return this.readerLogService.readLogBatch(robot.dir, exec.id, (items) => {
             const logs: Log[] = items.map(item => Log.fromData(item, exec.id));
             return Promise.resolve(Log.bulkCreate(logs));
         });
     }
 
     private insertMouvementSeries(robot: Robot, exec: Exec): Promise<unknown> {
-        this.log.info(`Insert mouvement series for ${robot.id} ${robot.name}`);
+        this.log.info(`Insert mouvement series for ${robot.id} ${robot.name} and ${exec.id}`);
 
         return this.influxService.readMouvementSeriesBatch(robot.dir, exec.id, (items) => {
             const insertMouvements = items.map(item => Mouvement.fromData(item, exec.id).save());
@@ -115,7 +122,7 @@ export class ExecService {
                     fields     : item.fields
                 };
             }), {
-                database : this.conf.influx.database,
+                database : this.config.influx.database,
                 precision: 'ms'
             });
         });
@@ -129,7 +136,7 @@ export class ExecService {
                 return Promise.all([
                     this.insertTimeSeries(robot, savedExecs),
                     this.insertMouvementSeries(robot, savedExecs),
-                    this.insertLog(robot.dir, savedExecs)
+                    this.insertLog(robot, savedExecs)
                 ]);
             })
             .then(() => {
@@ -140,7 +147,7 @@ export class ExecService {
     public importExecsForRobot(idRobot: number): Promise<void> {
         this.log.info(`Import logs for robot ${idRobot}`);
 
-        return Promise.resolve(Robot.findByPk(idRobot))
+        return this.robotService.findById(idRobot)
             .then((robot: Robot) => {
                 this.log.info(`Read log in dir ${robot.dir}`);
 

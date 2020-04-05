@@ -1,42 +1,50 @@
-import {Robot} from '../models/Robot';
-import {ExecService} from './ExecService';
-import {Inject, Singleton} from 'typescript-ioc';
-import {ExecsDTO} from '../dto/ExecsDTO';
+import { Cacheable, globalSet as cacheSet } from 'typescript-cacheable';
+import { Inject, Singleton } from 'typescript-ioc';
+import { Robot } from '../models/Robot';
+import { Config } from './Config';
 
 @Singleton
 export class RobotService {
 
-    private conf = require('../conf.json');
-
     @Inject
-    private execsService: ExecService;
+    private config: Config;
 
     constructor() {
     }
 
     save(robot: Robot): Promise<Robot> {
-        this.setDir(robot); // FIXME : Top tôt l'id n'est pas encore connu
         return Promise.resolve(robot.save());
     }
 
-    update(id: number, robot: any): Promise<Robot> {
+    update(id: number, robot: Robot): Promise<Robot> {
         return Promise.resolve(Robot.findByPk(id)
             .then(savedRobot => {
                 savedRobot.host = robot.host;
                 savedRobot.name = robot.name;
                 savedRobot.simulateur = robot.simulateur;
-                savedRobot.dir = robot.dir;
                 savedRobot.login = robot.login;
                 savedRobot.pwd = robot.pwd;
-                this.setDir(savedRobot);
                 return savedRobot.save();
-            }));
+            }))
+            .then(robot => {
+                robot.dir = this.buildDir(robot);
+                cacheSet(this, 'getDir', [id], robot.dir);
+                return robot;
+            });
     }
 
-    private setDir(robot: Robot) {
-        if (!robot.simulateur) {
-            robot.dir = `${this.conf.logsOutput}/${robot.id}`;
+    private buildDir(robot: Robot): string {
+        if (robot.simulateur) {
+            return `${this.config.logsOutput}/simulateur`; // volume docker ou lien symbolique
+        } else {
+            return `${this.config.logsOutput}/${robot.id}`;
         }
+    }
+
+    @Cacheable() // mis en cache car appellé pour chaque image de path
+    async getDir(idRobot: number): Promise<string> {
+        return this.findById(idRobot)
+            .then(robot => robot.dir);
     }
 
     findAll(): Promise<Robot[]> {
@@ -44,25 +52,16 @@ export class RobotService {
     }
 
     findById(id: number): Promise<Robot> {
-        return Promise.resolve(Robot.findByPk(id));
-    }
-
-    getRobotExecs(idRobot: number): Promise<ExecsDTO[]> {
-        return this.execsService.findAllExecsByRobot(idRobot)
-            .then((execs) => {
-                return execs.map(exec => new ExecsDTO(exec));
+        return Promise.resolve(Robot.findByPk(id))
+            .then(robot => {
+                robot.dir = this.buildDir(robot);
+                cacheSet(this, 'getDir', [id], robot.dir);
+                return robot;
             });
     }
 
     delete(idRobot: number): Promise<void> {
-        return Promise.all([
-            this.findById(idRobot),
-            this.execsService.findAllExecsByRobot(idRobot)
-        ])
-            .then(([robot, execs]) => {
-                const deleteExecs = execs.map(exec => this.execsService.delete(idRobot, exec.id));
-                return Promise.all(deleteExecs)
-                    .then(() => robot.destroy())
-            });
+        return Promise.resolve(Robot.findByPk(idRobot))
+            .then((robot) => robot.destroy());
     }
 }

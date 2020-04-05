@@ -1,14 +1,12 @@
-import {RobotService} from './RobotService';
-import {Inject, Singleton} from 'typescript-ioc';
-import {Robot} from '../models/Robot';
 import child from 'child_process';
-import {Logger} from './Logger';
+import { Inject, Singleton } from 'typescript-ioc';
+import { Robot } from '../models/Robot';
+import { Logger } from './Logger';
+import { RobotService } from './RobotService';
 
 @Singleton
 export class BashService {
     readonly GET_LOGS_SH = './scripts/getLogs.sh';
-
-    private conf = require('../conf.json');
 
     @Inject
     private robotService: RobotService;
@@ -20,12 +18,17 @@ export class BashService {
 
         return this.robotService.findById(robotId)
             .then((robot: Robot) => {
+                if (robot.simulateur) {
+                    this.log.info('Pas de copie pour le simulateur');
+                    return;
+                }
+
                 const host = robot.host.split(':')[0];
 
-                this.log.info(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${this.conf.logsOutput}`);
+                this.log.info(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${robot.dir}`);
 
                 return new Promise((resolve, reject) => {
-                    const getLogs = child.spawn(this.GET_LOGS_SH, [host, robot.name, this.conf.logsOutput + '/' + robot.id, robot.login, robot.pwd], {
+                    const getLogs = child.spawn(this.GET_LOGS_SH, [host, robot.name, robot.dir, robot.login, robot.pwd], {
                         cwd: process.cwd()
                     });
 

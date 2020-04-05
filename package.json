@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc && cp src/conf.prod.json dist/conf.json && cp -r scripts dist",
-    "start": "ts-node ./src/server.ts"
+    "start": "ln -sfn ../../../java/robots/nerell-parent/nerell-simulator/logs ./logs/simulateur && ts-node ./src/server.ts"
   },
   "author": "",
   "license": "MIT",
@@ -38,6 +38,7 @@
     "sequelize": "^5.21.2",
     "sequelize-typescript": "^1.0.0",
     "stream-json": "^1.3.1",
+    "typescript-cacheable": "^2.1.3",
     "typescript-ioc": "^1.2.4"
   },
   "devDependencies": {

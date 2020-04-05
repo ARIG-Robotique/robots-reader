@@ -1,4 +1,5 @@
 {
+  "production": true,
   "pg": {
     "host": "pg",
     "port": 5432,

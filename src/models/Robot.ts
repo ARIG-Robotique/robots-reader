@@ -15,9 +15,6 @@ export class Robot extends Model<Robot> {
     name: string;
 
     @Column
-    dir: string;
-
-    @Column
     simulateur: boolean;
 
     @Column
@@ -31,5 +28,7 @@ export class Robot extends Model<Robot> {
 
     @UpdatedAt
     updatedOn: Date;
+
+    dir: string;
 }
 

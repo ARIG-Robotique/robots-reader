@@ -1,27 +1,29 @@
-import express from 'express';
-import expressWs, {Application} from 'express-ws';
 import bodyParser from 'body-parser';
-import {Sequelize} from 'sequelize-typescript';
-import {Routes} from './routes/Routes';
-import {InfluxDB} from 'influx';
-import {find} from 'lodash';
+import express from 'express';
+import expressWs, { Application } from 'express-ws';
+import { InfluxDB } from 'influx';
+import { find } from 'lodash';
+import { Sequelize } from 'sequelize-typescript';
+import { Routes } from './routes/Routes';
+import { Config } from './services/Config';
 
 class App {
     public app: Application;
     public route: Routes;
     public sequelize: Sequelize;
-    private conf = require('./conf.json');
+    private config: Config;
 
     constructor() {
+        this.config = new Config();
         this.app = express() as any;
-        this.config();
+        this.configure();
         this.route = new Routes();
         this.route.routes(this.app);
         this.postgresSetup();
         this.influxDbSetup();
     }
 
-    private config(): void {
+    private configure(): void {
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: false}));
         this.app.use(function (req, res, next) {
@@ -36,12 +38,12 @@ class App {
 
     private postgresSetup(): void {
         this.sequelize = new Sequelize({
-            database  : this.conf.pg.database,
-            dialect   : this.conf.pg.dialect,
-            host      : this.conf.pg.host,
-            port      : this.conf.pg.port,
-            username  : this.conf.pg.user,
-            password  : this.conf.pg.password,
+            database  : this.config.pg.database,
+            dialect   : this.config.pg.dialect,
+            host      : this.config.pg.host,
+            port      : this.config.pg.port,
+            username  : this.config.pg.user,
+            password  : this.config.pg.password,
             modelPaths: [
                 __dirname + '/models'
             ],
@@ -68,11 +70,11 @@ class App {
     private influxDbSetup(): void {
         setTimeout(
             () => {
-                const influx = new InfluxDB(this.conf.influx);
+                const influx = new InfluxDB(this.config.influx);
                 influx.getDatabaseNames()
                     .then((names) => {
-                        if (!find(names, this.conf.influx.database)) {
-                            return influx.createDatabase(this.conf.influx.database);
+                        if (!find(names, this.config.influx.database)) {
+                            return influx.createDatabase(this.config.influx.database);
                         }
                     })
                     .catch((e) => {
