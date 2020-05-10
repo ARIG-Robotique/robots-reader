@@ -8,6 +8,10 @@ ENV NODE_ENV dev
 
 WORKDIR /app
 
+RUN mkdir -p logs/simulateur
+
+VOLUME /app/logs/simulateur
+
 COPY . .
 
 RUN yarn install \
