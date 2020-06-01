@@ -42,6 +42,11 @@ export class Routes {
                 return this.robotController.deleteRobotExec(req, res);
             });
 
+        app.route('/robot/:idRobot/execs/:idExec/logs')
+            .get((req: Request, res: Response) => {
+                return this.robotController.getExecLogs(req, res);
+            });
+
         app.route('/robot/:idRobot/execs/:idExec/paths')
             .get((req: Request, res: Response) => {
                 return this.robotController.getExecPaths(req, res);

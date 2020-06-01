@@ -120,6 +120,14 @@ export class Controller {
             );
     }
 
+    getExecLogs(req: Request, res: Response) {
+        this.execsService.getLogs(+req.params.idRobot, req.params.idExec)
+            .then(
+                result => res.status(200).json(result),
+                (e: Error) => this.handleError(e, res)
+            );
+    }
+
     getExecPaths(req: Request, res: Response) {
         this.execsService.getPaths(+req.params.idRobot, req.params.idExec)
             .then(

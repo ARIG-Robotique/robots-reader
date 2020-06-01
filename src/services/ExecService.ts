@@ -57,6 +57,13 @@ export class ExecService {
             });
     }
 
+    getLogs(idRobot: number, idExec: string): Promise<Log[]> {
+        return Promise.resolve(Log.findAll({
+            where: {idExec},
+            order: ['date', 'ASC'],
+        }));
+    }
+
     async getPaths(idRobot: number, idExec: string): Promise<string[]> {
         const dir = await this.robotService.getDir(idRobot);
 
