@@ -28,7 +28,5 @@ export class Robot extends Model<Robot> {
 
     @UpdatedAt
     updatedOn: Date;
-
-    dir: string;
 }
 

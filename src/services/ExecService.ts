@@ -32,7 +32,9 @@ export class ExecService {
     }
 
     create(robot: Robot, idExec: string): Promise<Exec> {
-        return this.readerLogService.getStartEnd(robot.dir, idExec)
+        const dir = this.robotService.buildDir(robot);
+
+        return this.readerLogService.getStartEnd(dir, idExec)
             .then(dates => {
                 const execsModel = new Exec({
                     id       : idExec,
@@ -99,18 +101,20 @@ export class ExecService {
     }
 
     private insertLog(robot: Robot, exec: Exec): Promise<unknown> {
+        const dir = this.robotService.buildDir(robot);
         this.log.info(`Insert log to postgres for ${robot.id} ${robot.name} and ${exec.id}`);
 
-        return this.readerLogService.readLogBatch(robot.dir, exec.id, (items) => {
+        return this.readerLogService.readLogBatch(dir, exec.id, (items) => {
             const logs: Log[] = items.map(item => Log.fromData(item, exec.id));
             return Promise.resolve(Log.bulkCreate(logs));
         });
     }
 
     private insertMouvementSeries(robot: Robot, exec: Exec): Promise<unknown> {
+        const dir = this.robotService.buildDir(robot);
         this.log.info(`Insert mouvement series for ${robot.id} ${robot.name} and ${exec.id}`);
 
-        return this.influxService.readMouvementSeriesBatch(robot.dir, exec.id, (items) => {
+        return this.influxService.readMouvementSeriesBatch(dir, exec.id, (items) => {
             const insertMouvements = items.map(item => Mouvement.fromData(item, exec.id).save());
 
             return Promise.all(insertMouvements);
@@ -118,9 +122,10 @@ export class ExecService {
     }
 
     private insertTimeSeries(robot: Robot, exec: Exec): Promise<unknown> {
+        const dir = this.robotService.buildDir(robot);
         this.log.info(`Insert log series to influx ${robot.id} ${robot.name} and ${exec.id}`);
 
-        return this.influxService.readTimeseriesBatch(robot.dir, exec.id, (items) => {
+        return this.influxService.readTimeseriesBatch(dir, exec.id, (items) => {
             return this.influx.writePoints(items.map((item) => {
                 return {
                     measurement: item.measurementName,
@@ -156,9 +161,10 @@ export class ExecService {
 
         return this.robotService.findById(idRobot)
             .then((robot: Robot) => {
-                this.log.info(`Read log in dir ${robot.dir}`);
+                const dir = this.robotService.buildDir(robot);
+                this.log.info(`Read log in dir ${dir}`);
 
-                return this.listExecs(robot.dir)
+                return this.listExecs(dir)
                     .then((idsExecs) => {
                         console.log(`Execs : ${idsExecs}`);
                         return this.importExecs(robot, idsExecs);

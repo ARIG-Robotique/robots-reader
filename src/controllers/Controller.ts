@@ -27,7 +27,6 @@ export class Controller {
         const robot = new Robot({
             host      : req.body.host,
             name      : req.body.name,
-            dir       : req.body.dir,
             simulateur: req.body.simulateur,
             login     : req.body.login,
             pwd       : req.body.pwd

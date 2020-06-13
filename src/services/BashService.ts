@@ -24,11 +24,12 @@ export class BashService {
                 }
 
                 const host = robot.host.split(':')[0];
+                const dir = this.robotService.buildDir(robot);
 
-                this.log.info(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${robot.dir}`);
+                this.log.info(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${dir}`);
 
                 return new Promise((resolve, reject) => {
-                    const getLogs = child.spawn(this.GET_LOGS_SH, [host, robot.name, robot.dir, robot.login, robot.pwd], {
+                    const getLogs = child.spawn(this.GET_LOGS_SH, [host, robot.name, dir, robot.login, robot.pwd], {
                         cwd: process.cwd()
                     });
 

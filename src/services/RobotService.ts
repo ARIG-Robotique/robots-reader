@@ -1,4 +1,4 @@
-import { Cacheable, globalSet as cacheSet } from 'typescript-cacheable';
+import { Cacheable } from 'typescript-cacheable';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Robot } from '../models/Robot';
 import { Config } from './Config';
@@ -25,15 +25,10 @@ export class RobotService {
                 savedRobot.login = robot.login;
                 savedRobot.pwd = robot.pwd;
                 return savedRobot.save();
-            }))
-            .then(robot => {
-                robot.dir = this.buildDir(robot);
-                cacheSet(this, 'getDir', [id], robot.dir);
-                return robot;
-            });
+            }));
     }
 
-    private buildDir(robot: Robot): string {
+    buildDir(robot: Robot): string {
         if (robot.simulateur) {
             return `${this.config.logsOutput}/simulateur`; // volume docker ou lien symbolique
         } else {
@@ -44,7 +39,7 @@ export class RobotService {
     @Cacheable() // mis en cache car appellé pour chaque image de path
     async getDir(idRobot: number): Promise<string> {
         return this.findById(idRobot)
-            .then(robot => robot.dir);
+            .then(robot => this.buildDir(robot));
     }
 
     findAll(): Promise<Robot[]> {
@@ -52,12 +47,7 @@ export class RobotService {
     }
 
     findById(id: number): Promise<Robot> {
-        return Promise.resolve(Robot.findByPk(id))
-            .then(robot => {
-                robot.dir = this.buildDir(robot);
-                cacheSet(this, 'getDir', [id], robot.dir);
-                return robot;
-            });
+        return Promise.resolve(Robot.findByPk(id));
     }
 
     delete(idRobot: number): Promise<void> {
