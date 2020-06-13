@@ -8,5 +8,4 @@ Makefile
 README.md
 npm-debug.log
 yarn-error.log
-flyway-*/
 logs/
