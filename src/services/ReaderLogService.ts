@@ -82,7 +82,7 @@ export class ReaderLogService {
      * Lecture d'un fichier de log en batch de 200 lignes
      */
     readLogBatch(robotDir: string, idExec: string, onData: (items: LogDTO[]) => Promise<unknown>): Promise<void> {
-        let items = [];
+        let items: LogDTO[] = [];
 
         return this.readLog(robotDir, idExec, (item, stream) => {
             items.push(item);
@@ -116,7 +116,7 @@ export class ReaderLogService {
         return new Promise((resolve, reject) => {
             fs.access(tracesPath, (err) => {
                 if (err) {
-                    this.log.warn('Log file does not exists');
+                    this.log.warn('Log file does not exist');
                     resolve();
                     return;
                 }

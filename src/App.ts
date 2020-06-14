@@ -47,6 +47,7 @@ class App {
             modelPaths: [
                 __dirname + '/models'
             ],
+            logging   : false,
         });
 
         this.syncDb();
