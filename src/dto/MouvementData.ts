@@ -1,5 +1,11 @@
-export class MouvementData {
-    path: Position[];
-    fromPoint: Position;
-    toPoint: Position;
+import { Position } from './Position';
+
+export interface MouvementData {
+    path?: Position[];
+    distance?: number;
+    fromPoint?: Position;
+    toPoint?: Position;
+    angle?: number;
+    fromAngle?: number;
+    toAngle?: number;
 }
