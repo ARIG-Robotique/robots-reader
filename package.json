@@ -22,7 +22,7 @@
     "line-by-line": "^0.1.6",
     "lodash": "^4.17.15",
     "log4js": "^6.1.0",
-    "pg": "^8.2.1",
+    "pg": "^8.2.2",
     "pg-promise": "^10.5.7",
     "promise": "^8.0.3",
     "reflect-metadata": "^0.1.12",
