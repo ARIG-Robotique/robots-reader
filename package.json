@@ -23,7 +23,7 @@
     "lodash": "^4.17.15",
     "log4js": "^6.1.0",
     "pg": "^8.2.1",
-    "pg-promise": "^10.5.7",
+    "pg-promise": "^10.5.8",
     "promise": "^8.0.3",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.5.4",
