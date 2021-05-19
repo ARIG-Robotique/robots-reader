@@ -10,7 +10,7 @@
   },
   "influx": {
     "host": "influxdb.arig.local",
-    "port": 8086,
+    "port": 80,
     "username": "arig",
     "password": "arig",
     "database": "robots"

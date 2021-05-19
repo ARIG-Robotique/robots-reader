@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc && cp src/conf.prod.json dist/conf.json && cp -r scripts dist/ && cp package.json dist/",
-    "start": "ln -sfn ../../../java/robots/nerell-parent/nerell-simulator/logs ./logs/simulateur && ts-node ./src/server.ts"
+    "nerell-simu-link": "ln -sfn ../../../java/robots/nerell-parent/nerell-simulator/logs ./logs/simulateur-nerell",
+    "odin-simu-link": "ln -sfn ../../../java/robots/odin-parent/odin-simulator/logs ./logs/simulateur-odin",
+    "start": "yarn nerell-simu-link && yarn odin-simu-link && ts-node ./src/server.ts"
   },
   "author": "",
   "license": "MIT",
