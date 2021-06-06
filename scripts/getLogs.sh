@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ROBOT_HOST=$1
-ROBOT_NAME=$2
+ROBOT_NAME=$(echo "$2" | tr '[:upper:]' '[:lower:]')
 LOGIN=$4
 PWD=$5
 LOG_DIR=$3
