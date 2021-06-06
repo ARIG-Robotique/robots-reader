@@ -32,7 +32,7 @@ export class RobotService {
         if (robot.simulateur) {
             return `${this.config.logsOutput}/simulateur-${robot.name.toLowerCase()}`; // volume docker ou lien symbolique
         } else {
-            return `${this.config.logsOutput}/${robot.id}`;
+            return `${this.config.logsOutput}/${robot.name.toLowerCase()}`;
         }
     }
 
