@@ -12,9 +12,6 @@ RUN yarn build
 # ------------ #
 FROM node:14-alpine as final
 
-RUN mkdir -p /logs/simulateur
-VOLUME /logs/simulateur
-
 RUN apk add --update --no-cache openssh sshpass
 
 EXPOSE 4100
