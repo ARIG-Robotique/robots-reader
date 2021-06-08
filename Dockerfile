@@ -19,6 +19,7 @@ EXPOSE 4100
 ENV NODE_ENV production
 
 WORKDIR /app
+RUN ln -s ../logs logs
 COPY --from=builder /build/dist/ .
 COPY yarn.lock .
 
