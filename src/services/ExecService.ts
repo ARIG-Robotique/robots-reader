@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { InfluxDB } from 'influx';
 import { extend } from 'lodash';
+import { Queue } from 'queue-promise';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Exec } from '../models/Exec';
 import { Log } from '../models/Log';
@@ -61,7 +62,7 @@ export class ExecService {
 
     getLogs(idRobot: number, idExec: string): Promise<Log[]> {
         return Promise.resolve(Log.findAll({
-            where: {idExec},
+            where: { idExec },
             order: [['date', 'ASC']],
         }));
     }
@@ -90,13 +91,13 @@ export class ExecService {
 
     private findAllMouvementByExec(idExec: string): Promise<Mouvement[]> {
         return Promise.resolve(Mouvement.findAll({
-            where: {idExec}
+            where: { idExec }
         }));
     }
 
     findAllExecsByRobot(idRobot: number): Promise<Exec[]> {
         return Promise.resolve(Exec.findAll({
-            where: {idRobot}
+            where: { idRobot }
         }));
     }
 
@@ -129,7 +130,7 @@ export class ExecService {
                 return {
                     measurement: item.measurementName,
                     timestamp  : item.time,
-                    tags       : extend({idexec: exec.id, robot: robot.name}, item.tags),
+                    tags       : extend({ idexec: exec.id, robot: robot.name }, item.tags),
                     fields     : item.fields
                 };
             }), {
@@ -197,17 +198,25 @@ export class ExecService {
                 this.log.debug(`Import ${filteredExecs.length} files`);
 
                 if (filteredExecs.length > 0) {
-                    const loadLogs = filteredExecs.map(execNum => this.importExec(robot, execNum));
-
-                    return Promise.all(loadLogs);
+                    const queue = new Queue({
+                        concurrent: 1,
+                        interval  : 0,
+                        start     : false,
+                    });
+                    filteredExecs.forEach(execNum => {
+                        queue.enqueue(() => this.importExec(robot, execNum));
+                    });
+                    return new Promise((resolve) => {
+                        queue.on('end', resolve);
+                        queue.start();
+                    });
                 }
-            })
-            .then(() => null);
+            });
     }
 
     private getAllExecsByRobot(idRobot: number): Promise<Exec[]> {
         return Promise.resolve(Exec.findAll({
-            where: {idRobot}
+            where: { idRobot }
         }));
     }
 

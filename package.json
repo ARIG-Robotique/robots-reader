@@ -2,7 +2,9 @@
   "name": "robots-reader",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc && cp src/conf.prod.json dist/conf.json && cp -r scripts dist/ && cp package.json dist/",
@@ -10,8 +12,6 @@
     "odin-simu-link": "ln -sfn ../../../java/robots/odin-parent/odin-simulator/logs ./logs/simulateur-odin",
     "start": "yarn nerell-simu-link && yarn odin-simu-link && ts-node ./src/server.ts"
   },
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.3",
     "date-fns": "^2.15.0",
@@ -27,6 +27,7 @@
     "pg": "^8.3.0",
     "pg-promise": "^10.5.8",
     "promise": "^8.0.3",
+    "queue-promise": "^2.2.1",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.6.2",
     "sequelize": "^5.21.13",
