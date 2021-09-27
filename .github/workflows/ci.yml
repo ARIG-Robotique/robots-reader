@@ -20,8 +20,8 @@ jobs:
       - id: build
         name: Build
         run: |
-          npm install
-          npm run build
+          yarn install
+          yarn run build
 
       - name: Notify slack success
         if: steps.build.outcome == 'success' && github.ref == 'refs/heads/dev'
