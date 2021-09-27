@@ -66,16 +66,17 @@ jobs:
           echo "IMAGE_ID=$IMAGE_ID"
           echo "VERSION=$VERSION"
 
-          echo "::set-env name=IMAGE_ID::$IMAGE_ID"
-          echo "::set-env name=VERSION::$VERSION"
+          # Register variables
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build image
         run: |
-          docker build . --file Dockerfile --tag $IMAGE_ID:$VERSION
+          docker build . --file Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          docker push $IMAGE_ID:$VERSION
+          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
