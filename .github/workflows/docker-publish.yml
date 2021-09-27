@@ -13,6 +13,9 @@ on:
   # Run tests for any PRs.
   pull_request:
 
+env:
+  IMAGE_NAME: robots-reader
+
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
@@ -64,6 +67,7 @@ jobs:
           [ "$VERSION" == "dev" ] && VERSION=latest
 
           echo "IMAGE_ID=$IMAGE_ID"
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
           echo "VERSION=$VERSION"
 
           # Register variables
@@ -72,11 +76,11 @@ jobs:
 
       - name: Build image
         run: |
-          docker build . --file Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+          docker build . --file Dockerfile --tag ${{ env.IMAGE_ID }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+          docker push ${{ env.IMAGE_ID }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
