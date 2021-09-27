@@ -13,9 +13,6 @@ on:
   # Run tests for any PRs.
   pull_request:
 
-env:
-  IMAGE_NAME: robots-reader
-
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
@@ -76,11 +73,11 @@ jobs:
 
       - name: Build image
         run: |
-          docker build . --file Dockerfile --tag ${{ env.IMAGE_ID }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          docker build . --file Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          docker push ${{ env.IMAGE_ID }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
