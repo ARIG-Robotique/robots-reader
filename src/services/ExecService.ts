@@ -96,9 +96,7 @@ export class ExecService {
     }
 
     findAllExecsByRobot(idRobot: number): Promise<Exec[]> {
-        return Promise.resolve(Exec.findAll({
-            where: { idRobot }
-        }));
+        return this.getAllExecsByRobot(idRobot);
     }
 
     private insertLog(robot: Robot, exec: Exec): Promise<unknown> {
