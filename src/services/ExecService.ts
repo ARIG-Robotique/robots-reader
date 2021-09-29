@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { InfluxDB } from 'influx';
 import { extend } from 'lodash';
-import { Queue } from 'queue-promise';
+import Queue from 'queue-promise';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Exec } from '../models/Exec';
 import { Log } from '../models/Log';
