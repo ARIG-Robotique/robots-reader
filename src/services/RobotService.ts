@@ -1,3 +1,4 @@
+import { Sequelize } from 'sequelize';
 import { Cacheable } from 'typescript-cacheable';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Robot } from '../models/Robot';
@@ -13,7 +14,13 @@ export class RobotService {
     }
 
     save(robot: Robot): Promise<Robot> {
-        return Promise.resolve(robot.save());
+        return Promise.resolve(new Robot({
+            host      : robot.host,
+            name      : robot.name,
+            simulateur: robot.simulateur,
+            login     : robot.login,
+            pwd       : robot.pwd
+        }).save());
     }
 
     update(id: number, robot: Robot): Promise<Robot> {
@@ -42,8 +49,10 @@ export class RobotService {
             .then(robot => this.buildDir(robot));
     }
 
-    findAll(): Promise<Robot[]> {
-        return Promise.resolve(Robot.findAll());
+    findAll(balise: boolean): Promise<Robot[]> {
+        return Promise.resolve(Robot.findAll({
+            where: Sequelize.and({ balise }),
+        }));
     }
 
     findById(id: number): Promise<Robot> {

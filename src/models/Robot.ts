@@ -18,6 +18,9 @@ export class Robot extends Model<Robot> {
     simulateur: boolean;
 
     @Column
+    balise: boolean;
+
+    @Column
     login: string;
 
     @Column

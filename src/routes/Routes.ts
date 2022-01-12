@@ -1,13 +1,16 @@
-import {Request, Response} from 'express';
-import {Inject} from 'typescript-ioc';
-import {Controller} from '../controllers/Controller';
-import {Application} from 'express-ws';
+import { Request, Response } from 'express';
+import { Inject } from 'typescript-ioc';
+import { BaliseController } from '../controllers/BaliseController';
+import { RobotController } from '../controllers/RobotController';
+import { Application } from 'express-ws';
 import WebSocket from 'ws';
-import {WebSocketWrapper} from '../utils/WebSocketWrapper';
+import { WebSocketWrapper } from '../utils/WebSocketWrapper';
 
 export class Routes {
     @Inject
-    public robotController: Controller;
+    public robotController: RobotController;
+    @Inject
+    public baliseController: BaliseController;
 
     constructor() {
     }
@@ -67,9 +70,33 @@ export class Routes {
                 return this.robotController.importLogs(req, res);
             });
 
+        app.route('/balise')
+            .get((req: Request, res: Response) => {
+                return this.baliseController.getAllBalises(req, res);
+            })
+            .post((req: Request, res: Response) => {
+                return this.baliseController.addBalise(req, res);
+            });
+
+        app.route('/balise/:idBalise')
+            .put((req: Request, res: Response) => {
+                return this.baliseController.updateBalise(req, res);
+            })
+            .get((req: Request, res: Response) => {
+                return this.baliseController.getBalise(req, res);
+            })
+            .delete((req: Request, res: Response) => {
+                return this.baliseController.deleteBalise(req, res);
+            });
+
+        app.route('/balise/:idBalise/action/:action')
+            .put((req: Request, res: Response) => {
+                return this.baliseController.doAction(req, res);
+            });
+
         app.route('/health')
             .get((req: Request, res: Response) => {
-                res.json({message: 'Hello world'});
+                res.json({ message: 'Hello world' });
             });
 
         app.ws('/ws', (ws: WebSocket) => {

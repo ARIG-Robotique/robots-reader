@@ -8,7 +8,7 @@ import { Logger } from '../services/Logger';
 import { RobotService } from '../services/RobotService';
 import { WebSocketWrapper } from '../utils/WebSocketWrapper';
 
-export class Controller {
+export class RobotController {
     @Inject
     private robotService: RobotService;
     @Inject
@@ -24,15 +24,10 @@ export class Controller {
     }
 
     addRobot(req: Request, res: Response) {
-        const robot = new Robot({
-            host      : req.body.host,
-            name      : req.body.name,
-            simulateur: req.body.simulateur,
-            login     : req.body.login,
-            pwd       : req.body.pwd
-        });
-
-        this.robotService.save(robot)
+        this.robotService.save({
+            ...req.body,
+            balise: false,
+        })
             .then(
                 (result) => res.status(201).json(result),
                 (e: Error) => this.handleError(e, res)
@@ -49,7 +44,7 @@ export class Controller {
     }
 
     getAllRobot(req: Request, res: Response) {
-        this.robotService.findAll()
+        this.robotService.findAll(false)
             .then(
                 (result) => res.status(200).json(result),
                 (e: Error) => this.handleError(e, res)
