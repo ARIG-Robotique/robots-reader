@@ -214,7 +214,8 @@ export class ExecService {
 
     private getAllExecsByRobot(idRobot: number): Promise<Exec[]> {
         return Promise.resolve(Exec.findAll({
-            where: { idRobot }
+            where: { idRobot },
+            order: [['id', 'ASC']],
         }));
     }
 
