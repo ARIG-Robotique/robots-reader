@@ -1,25 +1,22 @@
 #!/bin/sh
 
 ROBOT_HOST=$1
-ROBOT_NAME=$(echo "$2" | tr '[:upper:]' '[:lower:]')
-LOGIN=$4
-PWD=$5
+ROBOT_NAME=$2
 LOG_DIR=$3
 
 echo "Création répertoire de stockage des logs du robot"
 mkdir -p $LOG_DIR
 
 echo "Récupération logs ..."
-#rsync -ratlz --rsh="/usr/bin/sshpass -p $PWD ssh -o StrictHostKeyChecking=no -l $LOGIN" $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/*  $LOG_DIR
-sshpass -p $PWD scp -rv $LOGIN@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/* $LOG_DIR 2>&1
+scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -rv pi@$ROBOT_HOST:/home/pi/$ROBOT_NAME/logs/* $LOG_DIR 2>&1
 
 if [[ $? != 0 ]]; then
   echo "Pas de log a copier"
   exit 0
 fi
 
-echo "Suppression des logs du robots ..."
-sshpass -p $PWD ssh $LOGIN@$ROBOT_HOST sudo rm -Rvf /home/pi/$ROBOT_NAME/logs/* 2>&1
+echo "Suppression des logs du robot ..."
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null pi@$ROBOT_HOST sudo rm -Rvf /home/pi/$ROBOT_NAME/logs/* 2>&1
 
 if [[ $? != 0 ]]; then
   exit 1

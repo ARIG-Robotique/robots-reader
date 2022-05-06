@@ -1,4 +1,4 @@
-FROM node:14-alpine as builder
+FROM node:16-alpine as builder
 
 ENV NODE_ENV dev
 WORKDIR /build
@@ -10,9 +10,9 @@ RUN yarn build
 
 # Image finale #
 # ------------ #
-FROM node:14-alpine as final
+FROM node:16-alpine as final
 
-RUN apk add --update --no-cache openssh sshpass
+RUN apk add --update --no-cache openssh
 
 EXPOSE 4100
 
