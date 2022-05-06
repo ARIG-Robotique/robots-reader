@@ -12,24 +12,15 @@ export class Routes {
     constructor() {
     }
 
-    routes(app: Application) {
+    configure(app: Application) {
         app.route('/robot')
             .get((req: Request, res: Response) => {
                 return this.robotController.getAllRobot(req, res);
-            })
-            .post((req: Request, res: Response) => {
-                return this.robotController.addRobot(req, res);
             });
 
         app.route('/robot/:idRobot')
-            .put((req: Request, res: Response) => {
-                return this.robotController.updateRobot(req, res);
-            })
             .get((req: Request, res: Response) => {
                 return this.robotController.getRobot(req, res);
-            })
-            .delete((req: Request, res: Response) => {
-                return this.robotController.deleteRobot(req, res);
             });
 
         app.route('/robot/:idRobot/execs')

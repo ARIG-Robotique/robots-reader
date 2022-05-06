@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { Inject } from 'typescript-ioc';
 import { ExecsDTO } from '../dto/ExecsDTO';
-import { Robot } from '../models/Robot';
 import { BashService } from '../services/BashService';
 import { ExecService } from '../services/ExecService';
 import { Logger } from '../services/Logger';
@@ -21,31 +20,6 @@ export class Controller {
     private handleError(error: Error, res: Response) {
         this.log.error(error);
         res.json(error.message).status(500);
-    }
-
-    addRobot(req: Request, res: Response) {
-        const robot = new Robot({
-            host      : req.body.host,
-            name      : req.body.name,
-            simulateur: req.body.simulateur,
-            login     : req.body.login,
-            pwd       : req.body.pwd
-        });
-
-        this.robotService.save(robot)
-            .then(
-                (result) => res.status(201).json(result),
-                (e: Error) => this.handleError(e, res)
-            );
-    }
-
-    updateRobot(req: Request, res: Response) {
-        this.robotService.update(+req.params.idRobot, req.body)
-            .then(
-                (result) => res.status(201).json(result),
-                (e: Error) => this.handleError(e, res)
-            );
-
     }
 
     getAllRobot(req: Request, res: Response) {
@@ -139,20 +113,6 @@ export class Controller {
         this.execsService.getPathFile(+req.params.idRobot, req.params.idExec, req.params.file)
             .then(
                 result => res.sendFile(result, {root: '.'}),
-                (e: Error) => this.handleError(e, res)
-            );
-    }
-
-    deleteRobot(req: Request, res: Response) {
-        const idRobot = +req.params.idRobot;
-        this.execsService.findAllExecsByRobot(idRobot)
-            .then(execs => {
-                const deleteExecs = execs.map(exec => this.execsService.delete(idRobot, exec.id));
-                return Promise.all(deleteExecs)
-                    .then(() => this.robotService.delete(idRobot))
-            })
-            .then(
-                () => res.json().status(200),
                 (e: Error) => this.handleError(e, res)
             );
     }

@@ -6,19 +6,20 @@ import { find } from 'lodash';
 import { Sequelize } from 'sequelize-typescript';
 import { Routes } from './routes/Routes';
 import { Config } from './services/Config';
+import { RobotService } from './services/RobotService';
 
 class App {
     public app: Application;
-    public route: Routes;
-    public sequelize: Sequelize;
+    private sequelize: Sequelize;
     private config: Config;
+    private robotService: RobotService;
 
     constructor() {
         this.config = new Config();
+        this.robotService = new RobotService();
         this.app = express() as any;
         this.configure();
-        this.route = new Routes();
-        this.route.routes(this.app);
+        new Routes().configure(this.app);
         this.postgresSetup();
         this.influxDbSetup();
     }
@@ -58,7 +59,8 @@ class App {
             () =>
                 this.sequelize.sync({force: false})
                     .then(() => {
-                        console.log(`Database & tables created!`)
+                        console.log(`Database & tables created!`);
+                        this.robotService.init();
                     })
                     .catch((e) => {
                         console.error(e);
