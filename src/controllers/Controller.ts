@@ -93,6 +93,14 @@ export class Controller {
             );
     }
 
+    deleteAllRobotExec(req: Request, res: Response) {
+        this.execsService.deleteAll(+req.params.idRobot)
+            .then(
+                () => res.json().status(200),
+                (e: Error) => this.handleError(e, res)
+            );
+    }
+
     getExecLogs(req: Request, res: Response) {
         this.execsService.getLogs(+req.params.idRobot, req.params.idExec)
             .then(

@@ -49,6 +49,8 @@ export class ExecService {
     }
 
     async delete(idRobot: number, idExec: string): Promise<void> {
+        this.log.info(`Delete exec ${idExec} for robot ${idRobot}`);
+
         const dir = await this.robotService.getDir(idRobot);
 
         await Mouvement.destroy({
@@ -66,6 +68,16 @@ export class ExecService {
             fs.rm(Exec.timeseriesFile(dir, idExec), { force: true }),
             fs.rm(Exec.tracesFile(dir, idExec), { force: true }),
         ]);
+    }
+
+    async deleteAll(idRobot: number): Promise<void> {
+        this.log.info(`Delete all exes for robot ${idRobot}`);
+
+        const execs = await this.findAllExecsByRobot(idRobot);
+
+        for (let exec of execs) {
+            await this.delete(idRobot, exec.id);
+        }
     }
 
     getLogs(idRobot: number, idExec: string): Promise<Log[]> {
@@ -91,7 +103,10 @@ export class ExecService {
     }
 
     findAllExecsByRobot(idRobot: number): Promise<Exec[]> {
-        return this.getAllExecsByRobot(idRobot);
+        return Promise.resolve(Exec.findAll({
+            where: { idRobot },
+            order: [['dateStart', 'DESC']],
+        }));
     }
 
     private insertLog(robot: Robot, exec: Exec): Promise<unknown> {
@@ -178,7 +193,7 @@ export class ExecService {
     private importExecs(robot: Robot, idsExecs: string[]): Promise<void> {
         this.log.info(`Import logs for robot ${robot.id} with execsNum: ${idsExecs}`);
 
-        return this.getAllExecsByRobot(robot.id)
+        return this.findAllExecsByRobot(robot.id)
             .then((execs: Exec[]) => {
                 const savedExecs = execs.map(exec => exec.id);
                 const filteredExecs: string[] = idsExecs.filter(execNum => savedExecs.indexOf(execNum) === -1);
@@ -200,13 +215,6 @@ export class ExecService {
                     });
                 }
             });
-    }
-
-    private getAllExecsByRobot(idRobot: number): Promise<Exec[]> {
-        return Promise.resolve(Exec.findAll({
-            where: { idRobot },
-            order: [['dateStart', 'DESC']],
-        }));
     }
 
 }

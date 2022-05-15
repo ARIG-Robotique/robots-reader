@@ -26,6 +26,9 @@ export class Routes {
         app.route('/robot/:idRobot/execs')
             .get((req: Request, res: Response) => {
                 return this.robotController.getRobotExecs(req, res);
+            })
+            .delete((req: Request, res: Response) => {
+                return this.robotController.deleteAllRobotExec(req, res);
             });
 
         app.route('/robot/:idRobot/execs/:idExec')
