@@ -1,12 +1,12 @@
-import path from 'path';
-import fs from 'fs';
-import readline, {Interface} from 'readline';
+import { isValid, parseISO } from 'date-fns';
 import firstLine from 'first-line';
+import fs from 'fs';
 import lastLine from 'last-line';
-import {Inject, Singleton} from 'typescript-ioc';
-import {isValid, parseISO} from 'date-fns';
-import {Logger} from './Logger';
-import {LogDTO} from '../dto/LogDTO';
+import readline, { Interface } from 'readline';
+import { Inject, Singleton } from 'typescript-ioc';
+import { LogDTO } from '../dto/LogDTO';
+import { Exec } from '../models/Exec';
+import { Logger } from './Logger';
 
 @Singleton
 export class ReaderLogService {
@@ -48,7 +48,7 @@ export class ReaderLogService {
      */
     getStartEnd(robotDir: string, idExec: string): Promise<{ start: Date, end: Date }> {
         return new Promise<{ start: Date, end: Date }>((resolve, reject) => {
-            const tracesPath = path.join(robotDir, `${idExec}.exec`);
+            const tracesPath = Exec.execFile(robotDir, idExec);
             return Promise.all([
                 this.firstLine(tracesPath),
                 this.lastLine(tracesPath)
@@ -111,7 +111,7 @@ export class ReaderLogService {
      */
     private readLog(robotDir: string, idExec: string, onData: (content: LogDTO, stream: Interface) => void): Promise<void> {
         this.log.info(`readlog ${robotDir} ${idExec}`);
-        const tracesPath = path.join(robotDir, `${idExec}-traces.log`);
+        const tracesPath = Exec.tracesFile(robotDir, idExec);
 
         return new Promise((resolve, reject) => {
             fs.access(tracesPath, (err) => {

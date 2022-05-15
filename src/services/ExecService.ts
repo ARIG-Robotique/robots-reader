@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import { InfluxDB } from 'influx';
 import { extend } from 'lodash';
 import Queue from 'queue-promise';
@@ -48,16 +48,24 @@ export class ExecService {
             });
     }
 
-    delete(idRobot: number, idExec: string): Promise<void> {
-        return Promise.all([
-            Exec.findByPk(idExec),
-            this.findAllMouvementByExec(idExec),
-        ])
-            .then(([exec, mouvements]) => {
-                const deleteMouvements = mouvements.map(mouvement => mouvement.destroy());
-                return Promise.all(deleteMouvements)
-                    .then(() => exec.destroy());
-            });
+    async delete(idRobot: number, idExec: string): Promise<void> {
+        const dir = await this.robotService.getDir(idRobot);
+
+        await Mouvement.destroy({
+            where: { idExec },
+        });
+
+        await Exec.destroy({
+            where: { id: idExec },
+        });
+
+        await Promise.allSettled([
+            fs.rm(Exec.pathDirectory(dir, idExec), { force: true, recursive: true }),
+            fs.rm(Exec.execFile(dir, idExec), { force: true }),
+            fs.rm(Exec.mouvementsFile(dir, idExec), { force: true }),
+            fs.rm(Exec.timeseriesFile(dir, idExec), { force: true }),
+            fs.rm(Exec.tracesFile(dir, idExec), { force: true }),
+        ]);
     }
 
     getLogs(idRobot: number, idExec: string): Promise<Log[]> {
@@ -70,29 +78,16 @@ export class ExecService {
     async getPaths(idRobot: number, idExec: string): Promise<string[]> {
         const dir = await this.robotService.getDir(idRobot);
 
-        return new Promise((resolve, reject) => {
-            const path = `${dir}/path/${idExec}`;
-
-            fs.readdir(path, (err, files) => {
-                if (err) {
-                    this.log.error(`Error while listing paths ${err.message}`);
-                    reject(err);
-                } else {
-                    resolve(files);
-                }
+        return fs.readdir(Exec.pathDirectory(dir, idExec))
+            .catch(err => {
+                this.log.error(`Error while listing paths ${err.message}`);
+                throw err;
             });
-        });
     }
 
     async getPathFile(idRobot: number, idExec: string, file: string): Promise<string> {
         const dir = await this.robotService.getDir(idRobot);
-        return Promise.resolve(`${dir}/path/${idExec}/${file}`);
-    }
-
-    private findAllMouvementByExec(idExec: string): Promise<Mouvement[]> {
-        return Promise.resolve(Mouvement.findAll({
-            where: { idExec }
-        }));
+        return Promise.resolve(`${Exec.pathDirectory(dir, idExec)}/${file}`);
     }
 
     findAllExecsByRobot(idRobot: number): Promise<Exec[]> {
@@ -171,18 +166,13 @@ export class ExecService {
     }
 
     private listExecs(dir: string): Promise<string[]> {
-        return new Promise((resolve, reject) => {
-            fs.readdir(dir, (error, files: string[]) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    const execsNum = files
-                        .filter(file => file.split('.exec').length > 1)
-                        .map(file => file.split('.')[0]);
-                    resolve([...new Set(execsNum)]);
-                }
+        return fs.readdir(dir)
+            .then(files => {
+                const execsNum = files
+                    .filter(file => file.split('.exec').length > 1)
+                    .map(file => file.split('.')[0]);
+                return [...new Set(execsNum)];
             });
-        });
     }
 
     private importExecs(robot: Robot, idsExecs: string[]): Promise<void> {

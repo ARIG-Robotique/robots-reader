@@ -1,7 +1,7 @@
-import fs, {ReadStream} from 'fs';
-import {Inject, Singleton} from 'typescript-ioc';
-import {Logger} from './Logger';
-import path from 'path';
+import fs, { ReadStream } from 'fs';
+import { Inject, Singleton } from 'typescript-ioc';
+import { Exec } from '../models/Exec';
+import { Logger } from './Logger';
 
 const StreamArray = require('stream-json/streamers/StreamArray');
 
@@ -15,21 +15,19 @@ export class ReadTimeSeriesService {
      * Lit un fichier *-mouvement.json en batch de 100 lignes.
      */
     readMouvementSeriesBatch(dir: string, idExec: string, onData: (items: any[]) => Promise<unknown>): Promise<void> {
-        const url = `${idExec}-mouvement.json`;
-        return this.readSeriesFile(dir, url, onData);
+        return this.readSeriesFile(Exec.mouvementsFile(dir, idExec), onData);
     }
 
     /**
      * Lire le fichier *-timeseries.json en batch de 100 lignes.
      */
     readTimeseriesBatch(dir: string, idExec: string, onData: (items: any[]) => Promise<unknown>): Promise<void> {
-        const url = `${idExec}-timeseries.json`;
-        return this.readSeriesFile(dir, url, onData);
+        return this.readSeriesFile(Exec.timeseriesFile(dir, idExec), onData);
     }
 
-    private readSeriesFile(dir: string, url: string, onData: (items: any[]) => Promise<unknown>): Promise<void> {
+    private readSeriesFile(file: string, onData: (items: any[]) => Promise<unknown>): Promise<void> {
         let items = [];
-        return this.readTimeseries(dir, url, (item: any, stream: ReadStream) => {
+        return this.readTimeseries(file, (item: any, stream: ReadStream) => {
             items.push(item);
 
             if (items.length >= 100) {
@@ -41,7 +39,7 @@ export class ReadTimeSeriesService {
                     }, (err: Error) => {
                         items.length = 0;
                         stream.destroy();
-                        this.log.error(`Error while processing file ${dir} ${url} with error : ${err.stack}`);
+                        this.log.error(`Error while processing file ${file} with error : ${err.stack}`);
                     });
 
                 items.length = 0;
@@ -54,20 +52,18 @@ export class ReadTimeSeriesService {
     /**
      * Lecture d'un fichier timeseries en stream
      */
-    private readTimeseries(dir: string, url: string, onData: (item: any, readStream: ReadStream) => void): Promise<void> {
-        const timeseriesPath = path.join(dir, url);
-
-        this.log.info(`Read timeseries file ${timeseriesPath}`);
+    private readTimeseries(file: string, onData: (item: any, readStream: ReadStream) => void): Promise<void> {
+        this.log.info(`Read timeseries file ${file}`);
 
         return new Promise((resolve) => {
-            fs.access(timeseriesPath, (err) => {
+            fs.access(file, (err) => {
                 if (err) {
-                    this.log.warn(`${timeseriesPath} does not exists`);
+                    this.log.warn(`${file} does not exists`);
                     resolve();
                     return;
                 }
 
-                const fileStream: ReadStream = fs.createReadStream(timeseriesPath);
+                const fileStream: ReadStream = fs.createReadStream(file);
                 const stream = fileStream.pipe(StreamArray.withParser());
 
                 stream.on('data', (item) => {

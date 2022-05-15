@@ -22,4 +22,24 @@ export class Exec extends Model<Exec> {
 
     @UpdatedAt
     updatedOn: Date;
+
+    public static execFile(robotDir: string, idExec: Exec['id']) {
+        return `${robotDir}/${idExec}.exec`;
+    }
+
+    public static pathDirectory(robotDir: string, idExec: Exec['id']) {
+        return `${robotDir}/path/${idExec}`;
+    }
+
+    public static mouvementsFile(robotDir: string, idExec: Exec['id']) {
+        return `${robotDir}/${idExec}-mouvement.json`;
+    }
+
+    public static timeseriesFile(robotDir: string, idExec: Exec['id']) {
+        return `${robotDir}/${idExec}-timeseries.json`;
+    }
+
+    public static tracesFile(robotDir: string, idExec: Exec['id']) {
+        return `${robotDir}/${idExec}-traces.log`;
+    }
 }
