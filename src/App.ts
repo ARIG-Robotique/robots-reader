@@ -17,7 +17,7 @@ class App {
     constructor() {
         this.config = new Config();
         this.robotService = new RobotService();
-        this.app = express() as any;
+        this.app = expressWs(express()).app;
         this.configure();
         new Routes().configure(this.app);
         this.postgresSetup();
@@ -34,7 +34,6 @@ class App {
             res.header('Access-Control-Allow-Credentials', 'true');
             next();
         });
-        expressWs(this.app);
     }
 
     private postgresSetup(): void {

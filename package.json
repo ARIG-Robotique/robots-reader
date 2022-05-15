@@ -6,12 +6,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src --ext .ts",
     "build": "tsc && cp src/conf.prod.json dist/conf.json && cp -r scripts dist/ && cp package.json dist/",
     "mk-folders": "mkdir -p logs && mkdir -p logs-simulateur",
     "nerell-simu-link": "ln -sfn ../../../java/robots/nerell-parent/nerell-simulator/logs ./logs-simulateur/nerell",
     "odin-simu-link": "ln -sfn ../../../java/robots/odin-parent/odin-simulator/logs ./logs-simulateur/odin",
-    "start": "yarn nerell-simu-link && yarn odin-simu-link && ts-node ./src/server.ts"
+    "start": "yarn mk-folders && yarn nerell-simu-link && yarn odin-simu-link && ts-node ./src/server.ts"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
@@ -25,7 +25,6 @@
     "lodash": "^4.17.21",
     "log4js": "^6.4.4",
     "pg": "^8.3.0",
-    "pg-promise": "^10.5.8",
     "queue-promise": "^2.2.1",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.6.2",
@@ -37,13 +36,15 @@
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.29",
-    "@types/cors": "^2.8.7",
     "@types/express": "^4.17.7",
     "@types/express-ws": "^3.0.0",
     "@types/node": "^14.18.18",
     "@types/validator": "^13.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "eslint": "^8.15.0",
     "nodemon": "^2.0.1",
     "ts-node": "^8.1.0",
-    "typescript": "^3.9.7"
+    "typescript": "^4.6.4"
   }
 }

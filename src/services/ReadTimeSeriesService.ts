@@ -2,8 +2,7 @@ import fs, { ReadStream } from 'fs';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Exec } from '../models/Exec';
 import { Logger } from './Logger';
-
-const StreamArray = require('stream-json/streamers/StreamArray');
+import StreamArray = require('stream-json/streamers/StreamArray');
 
 @Singleton
 export class ReadTimeSeriesService {
@@ -26,7 +25,7 @@ export class ReadTimeSeriesService {
     }
 
     private readSeriesFile(file: string, onData: (items: any[]) => Promise<unknown>): Promise<void> {
-        let items = [];
+        const items = [];
         return this.readTimeseries(file, (item: any, stream: ReadStream) => {
             items.push(item);
 

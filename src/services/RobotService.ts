@@ -9,9 +9,6 @@ export class RobotService {
     @Inject
     private config: Config;
 
-    constructor() {
-    }
-
     buildDir(robot: Robot): string {
         if (robot.simulateur) {
             return `${this.config.logsOutput}-simulateur/${robot.name.toLowerCase()}`;

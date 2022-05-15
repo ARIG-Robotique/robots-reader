@@ -21,6 +21,7 @@ jobs:
         name: Build
         run: |
           yarn install
+          yarn run lint
           yarn run build
 
       - name: Notify slack success

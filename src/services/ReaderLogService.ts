@@ -82,8 +82,7 @@ export class ReaderLogService {
      * Lecture d'un fichier de log en batch de 200 lignes
      */
     readLogBatch(robotDir: string, idExec: string, onData: (items: LogDTO[]) => Promise<unknown>): Promise<void> {
-        let items: LogDTO[] = [];
-
+        const items: LogDTO[] = [];
         return this.readLog(robotDir, idExec, (item, stream) => {
             items.push(item);
 
@@ -113,7 +112,7 @@ export class ReaderLogService {
         this.log.info(`readlog ${robotDir} ${idExec}`);
         const tracesPath = Exec.tracesFile(robotDir, idExec);
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             fs.access(tracesPath, (err) => {
                 if (err) {
                     this.log.warn('Log file does not exist');
@@ -159,7 +158,7 @@ export class ReaderLogService {
      * Parse une ligne de log CSV
      */
     private parseLog(line: string): LogDTO {
-        let matches = line.match(/^([^;]+);([^;]+);([^;]+);([^;]+);(.*)$/);
+        const matches = line.match(/^([^;]+);([^;]+);([^;]+);([^;]+);(.*)$/);
 
         if (matches) {
             return {

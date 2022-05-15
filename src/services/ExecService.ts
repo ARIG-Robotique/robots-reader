@@ -75,7 +75,7 @@ export class ExecService {
 
         const execs = await this.findAllExecsByRobot(idRobot);
 
-        for (let exec of execs) {
+        for (const exec of execs) {
             await this.delete(idRobot, exec.id);
         }
     }

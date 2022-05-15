@@ -1,5 +1,6 @@
 import { Dialect } from 'sequelize/types';
 import { Singleton } from 'typescript-ioc';
+import conf = require('../conf.json');
 
 @Singleton
 export class Config {
@@ -22,7 +23,6 @@ export class Config {
     logsOutput: string;
 
     constructor() {
-        const conf = require('../conf.json');
         Object.assign(this, conf);
     }
 }

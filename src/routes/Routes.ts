@@ -6,11 +6,9 @@ import WebSocket from 'ws';
 import {WebSocketWrapper} from '../utils/WebSocketWrapper';
 
 export class Routes {
+
     @Inject
     public robotController: Controller;
-
-    constructor() {
-    }
 
     configure(app: Application) {
         app.route('/robot')
