@@ -1,12 +1,13 @@
 # Ignore file to not include in build.
 .editorconfig
-.git/
+.git
 .gitignore
-.idea/
-node_modules/
+.idea
+node_modules
 Makefile
 README.md
 npm-debug.log
 yarn-error.log
-dist/
-logs/
+dist
+logs
+logs-simulateur

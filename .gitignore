@@ -1,8 +1,9 @@
-.idea/
+.idea
 *.iws
 *.iml
 node_modules
 temp
 yarn-error.log
-dist/
-logs/
+dist
+logs
+logs-simulateur

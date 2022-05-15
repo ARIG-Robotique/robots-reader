@@ -14,7 +14,7 @@ export class RobotService {
 
     buildDir(robot: Robot): string {
         if (robot.simulateur) {
-            return `${this.config.logsOutput}/simulateur-${robot.name.toLowerCase()}`; // volume docker ou lien symbolique
+            return `${this.config.logsOutput}-simulateur/${robot.name.toLowerCase()}`;
         } else {
             return `${this.config.logsOutput}/${robot.name.toLowerCase()}`;
         }
