@@ -1,7 +1,7 @@
 {
   "production": true,
   "pg": {
-    "host": "pg.arig.local",
+    "host": "pg.arig.org",
     "port": 5432,
     "user": "arig",
     "password": "arig",
@@ -9,7 +9,7 @@
     "dialect": "postgres"
   },
   "influx": {
-    "host": "influxdb.arig.local",
+    "host": "influxdb.arig.org",
     "port": 8086,
     "username": "arig",
     "password": "arig",
