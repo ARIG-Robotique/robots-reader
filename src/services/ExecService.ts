@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
-import { InfluxDB } from 'influx';
-import { extend } from 'lodash';
 import Queue from 'queue-promise';
+import { InfluxDB, Point } from '@influxdata/influxdb-client';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Exec } from '../models/Exec';
 import { Log } from '../models/Log';
@@ -29,7 +28,7 @@ export class ExecService {
     private log: Logger;
 
     constructor() {
-        this.influx = new InfluxDB(this.config.influx);
+        this.influx = new InfluxDB({url: this.config.influx.url, token: this.config.influx.token})
     }
 
     create(robot: Robot, idExec: string): Promise<Exec> {
@@ -134,17 +133,22 @@ export class ExecService {
         this.log.info(`Insert timeseries to influx for robot ${robot.id} exec ${exec.id}`);
 
         return this.influxService.readTimeseriesBatch(dir, exec.id, (items) => {
-            return this.influx.writePoints(items.map((item) => {
-                return {
-                    measurement: item.measurementName,
-                    timestamp  : item.time,
-                    tags       : extend({ idexec: exec.id, robot: robot.name }, item.tags),
-                    fields     : item.fields
-                };
-            }), {
-                database : this.config.influx.database,
-                precision: 'ms'
+            const influxWriteApi = this.influx.getWriteApi(this.config.influx.org, this.config.influx.bucket, 'ms');
+            items.map((item) => {
+                const pt = new Point(item.measurementName);
+                pt.timestamp(item.time);
+                pt.fields = item.fields;
+                
+                pt.tag('idexec', exec.id);
+                pt.tag('robot', robot.name);
+                for (const k in item.tags) {
+                    pt.tag(k, item.tags[k]);
+                }
+
+                influxWriteApi.writePoint(pt);
             });
+
+            return influxWriteApi.close();
         });
     }
 

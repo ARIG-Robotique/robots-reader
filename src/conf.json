@@ -9,11 +9,10 @@
     "dialect": "postgres"
   },
   "influx": {
-    "host": "influxdb.arig.org",
-    "port": 80,
-    "username": "arig",
-    "password": "arig",
-    "database": "robots"
+    "url": "http://influxdb.arig.org",
+    "org": "arig",
+    "bucket": "robots",
+    "token": "super-token-connu-pour-auth"
   },
   "logsOutput": "./logs"
 }

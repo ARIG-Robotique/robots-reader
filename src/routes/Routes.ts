@@ -66,7 +66,7 @@ export class Routes {
 
         app.ws('/ws', (ws: WebSocket) => {
             ws.on('message', (msg) => {
-                const message = JSON.parse(msg as string);
+                const message = JSON.parse(msg as unknown as string);
 
                 if (message.action === 'importLogs') {
                     this.robotController.importLogsStream(message.data, new WebSocketWrapper(ws));

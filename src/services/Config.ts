@@ -14,11 +14,10 @@ export class Config {
         dialect: Dialect;
     };
     influx: {
-        host: string;
-        port: number;
-        user: string;
-        password: string;
-        database: string;
+        url: string;
+        org: string;
+        bucket: string;
+        token: string;
     };
     logsOutput: string;
 

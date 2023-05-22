@@ -1,8 +1,8 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import expressWs, { Application } from 'express-ws';
-import { InfluxDB } from 'influx';
-import { find } from 'lodash';
+import { InfluxDB, HttpError } from '@influxdata/influxdb-client';
+import { OrgsAPI, BucketsAPI } from '@influxdata/influxdb-client-apis';
 import { Sequelize } from 'sequelize-typescript';
 import { Routes } from './routes/Routes';
 import { Config } from './services/Config';
@@ -58,7 +58,7 @@ class App {
             () =>
                 this.sequelize.sync({force: false})
                     .then(() => {
-                        console.log(`Database & tables created!`);
+                        console.log(`PostgreSQL database & tables created !`);
                         this.robotService.init();
                     })
                     .catch((e) => {
@@ -71,18 +71,35 @@ class App {
 
     private influxDbSetup(): void {
         setTimeout(
-            () => {
-                const influx = new InfluxDB(this.config.influx);
-                influx.getDatabaseNames()
-                    .then((names) => {
-                        if (!find(names, this.config.influx.database)) {
-                            return influx.createDatabase(this.config.influx.database);
-                        }
-                    })
-                    .catch((e) => {
-                        console.error(e);
-                        this.influxDbSetup();
-                    });
+            async () => {
+                const url = this.config.influx.url;
+                const org = this.config.influx.org;
+                const bucket = this.config.influx.bucket;
+                const token = this.config.influx.token;
+
+                const influx = new InfluxDB({url, token});
+
+                const orgsAPI = new OrgsAPI(influx);
+                const organizations = await orgsAPI.getOrgs({org});
+                const orgID = organizations.orgs[0].id;
+
+                const bucketsAPI = new BucketsAPI(influx);
+                try {
+                  const buckets = await bucketsAPI.getBuckets({orgID, name: bucket})
+                  if (buckets && buckets.buckets && buckets.buckets.length) {
+                    const bucketID = buckets.buckets[0].id
+                      console.log(`Bucket named "${this.config.influx.bucket}" (#${bucketID}) exist"`)
+                  }
+                } catch (e) {
+                  if (e instanceof HttpError && e.statusCode == 404) {
+                    // OK, bucket not found
+                    console.log(`Bucket named "${this.config.influx.bucket}" not exist"`)
+                    console.error(e);
+                    this.influxDbSetup();
+                  } else {
+                    throw e
+                  }
+                }
             },
             5000
         );
