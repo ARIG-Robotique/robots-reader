@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch robots-reader",
+            "name": "Launch robots-reader Mac Greg",
             "type": "node",
             "request": "launch",
             "console": "integratedTerminal",            
-            "cwd": "/home/gregorydepuille@sglk.local/workspaces/arig-wksp/javascript/robots-reader",
+            "cwd": "/Users/gregorydepuille/sogelink/workspaces/arig-workspaces/javascript/robots-reader",
 
             "args": ["src/server.ts"],
             "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
