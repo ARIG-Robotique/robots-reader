@@ -5,8 +5,10 @@ WORKDIR /build
 
 COPY . .
 
-RUN yarn install
-RUN yarn build
+RUN <<EOF
+yarn install
+yarn build
+EOF
 
 # Image finale #
 # ------------ #
@@ -19,8 +21,11 @@ EXPOSE 4100
 ENV NODE_ENV production
 
 WORKDIR /app
-RUN mkdir -p /logs && ln -s /logs logs
-RUN mkdir -p /logs-simulateur && ln -s /logs-simulateur logs-simulateur
+RUN <<EOF
+mkdir -p /logs && ln -s /logs logs
+mkdir -p /logs-simulateur && ln -s /logs-simulateur logs-simulateur
+EOF
+
 COPY --from=builder /build/dist/ .
 COPY yarn.lock .
 

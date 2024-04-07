@@ -11,7 +11,11 @@
     "mk-folders": "mkdir -p logs && mkdir -p logs-simulateur",
     "nerell-simu-link": "ln -sfn ../../../java/robots/nerell-parent/nerell-simulator/logs ./logs-simulateur/nerell",
     "odin-simu-link": "ln -sfn ../../../java/robots/odin-parent/odin-simulator/logs ./logs-simulateur/odin",
-    "start": "yarn mk-folders && yarn nerell-simu-link && yarn odin-simu-link && ts-node ./src/server.ts"
+    "pami-triangle-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-triangle ./logs-simulateur/pami-triangle",
+    "pami-carre-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-carre ./logs-simulateur/pami-carre",
+    "pami-rond-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-rond ./logs-simulateur/pami-rond",
+    "pami-simu-link": "yarn pami-triangle-simu-link && yarn pami-carre-simu-link && yarn pami-rond-simu-link",
+    "start": "yarn mk-folders && yarn nerell-simu-link && yarn odin-simu-link && yarn pami-simu-link && ts-node ./src/server.ts"
   },
   "dependencies": {
     "body-parser": "^1.19.2",

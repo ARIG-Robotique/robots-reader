@@ -36,8 +36,14 @@ export class RobotService {
             .then((robots) => {
                 const hasNerell = robots.find(r => r.name === 'Nerell' && !r.simulateur);
                 const hasNerellSimu = robots.find(r => r.name === 'Nerell' && r.simulateur);
-                const hasOdin = robots.find(r => r.name === 'Odin' && !r.simulateur);
-                const hasOdinSimu = robots.find(r => r.name === 'Odin' && r.simulateur);
+                //const hasOdin = robots.find(r => r.name === 'Odin' && !r.simulateur);
+                //const hasOdinSimu = robots.find(r => r.name === 'Odin' && r.simulateur);
+                const hasPamiTriangle = robots.find(r => r.name === 'Pami Triangle' && !r.simulateur);
+                const hasPamiTriangleSimu = robots.find(r => r.name === 'Pami Triangle' && r.simulateur);
+                const hasPamiCarre = robots.find(r => r.name === 'Pami Carre' && !r.simulateur);
+                const hasPamiCarreSimu = robots.find(r => r.name === 'Pami Carre' && r.simulateur);
+                const hasPamiRond = robots.find(r => r.name === 'Pami Rond' && !r.simulateur);
+                const hasPamiRondSimu = robots.find(r => r.name === 'Pami Rond' && r.simulateur);
 
                 if (!hasNerell) {
                     new Robot({
@@ -53,9 +59,9 @@ export class RobotService {
                         simulateur: true,
                     }).save();
                 }
-                if (!hasOdin) {
+                /*if (!hasOdin) {
                     new Robot({
-                        host      : 'odin:8081',
+                        host      : 'odin:8080',
                         name      : 'Odin',
                         simulateur: false,
                     }).save();
@@ -64,6 +70,48 @@ export class RobotService {
                     new Robot({
                         host      : 'localhost:8081',
                         name      : 'Odin',
+                        simulateur: true,
+                    }).save();
+                }*/
+                if (!hasPamiTriangle) {
+                    new Robot({
+                        host      : 'pami-triangle:8080',
+                        name      : 'Pami △',
+                        simulateur: false,
+                    }).save();
+                }
+                if (!hasPamiTriangleSimu) {
+                    new Robot({
+                        host      : 'localhost:8082',
+                        name      : 'Pami △',
+                        simulateur: true,
+                    }).save();
+                }
+                if (!hasPamiCarre) {
+                    new Robot({
+                        host      : 'pami-carre:8080',
+                        name      : 'Pami ▢',
+                        simulateur: false,
+                    }).save();
+                }
+                if (!hasPamiCarreSimu) {
+                    new Robot({
+                        host      : 'localhost:8083',
+                        name      : 'Pami ▢',
+                        simulateur: true,
+                    }).save();
+                }
+                if (!hasPamiRond) {
+                    new Robot({
+                        host      : 'pami-rond:8080',
+                        name      : 'Pami ○',
+                        simulateur: false,
+                    }).save();
+                }
+                if (!hasPamiRondSimu) {
+                    new Robot({
+                        host      : 'localhost:8084',
+                        name      : 'Pami ○',
                         simulateur: true,
                     }).save();
                 }
