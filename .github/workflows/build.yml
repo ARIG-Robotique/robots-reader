@@ -1,50 +1,60 @@
-name: Docker publish
+name: CI
 
 on:
   push:
-    # Publish `dev` as Docker `latest` image.
     branches:
       - dev
-
-    # Publish `v1.2.3` tags as releases.
-    tags:
-      - v*
-
-  # Run tests for any PRs.
-  pull_request:
+  pull_request: {}
+  workflow_dispatch: {}
 
 jobs:
-  # Run tests.
-  # See also https://docs.docker.com/docker-hub/builds/automated-testing/
-#  test:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#
-#      - name: Run tests
-#        run: |
-#          if [ -f docker-compose.test.yml ]; then
-#            docker-compose --file docker-compose.test.yml build
-#            docker-compose --file docker-compose.test.yml run sut
-#          else
-#            docker build . --file Dockerfile
-#          fi
-
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
-  push:
-    # Ensure test job passes before pushing image.
-#    needs: test
-
+  build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js from 'package.json'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'yarn'
+
+      - name: Build
+        run: |
+          yarn install
+          yarn run lint
+          yarn run build
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_type == 'tag')
+        with:
+          name: dist-${{ github.ref_name }}
+          path: dist
+          retention-days: 1
+
+  docker:
+    runs-on: ubuntu-latest
+
+    needs: build
+    # Only publish dev branch and tags
+    if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_type == 'tag')
 
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get artifact from Build job
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: dist
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -85,9 +95,9 @@ jobs:
           # Docker buildx platforms
           docker buildx ls
 
-      - name: Build and push
-        uses: docker/build-push-action@v3
+      - uses: docker/build-push-action@v3
         with:
+          context: .
           push: true
           tags: ${{ env.IMAGE_ID }}:${{ env.VERSION }}
           platforms: linux/amd64,linux/arm64
