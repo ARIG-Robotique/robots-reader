@@ -3,11 +3,9 @@
 .git
 .gitignore
 .idea
-node_modules
 Makefile
 README.md
 npm-debug.log
 yarn-error.log
-dist
 logs
 logs-simulateur

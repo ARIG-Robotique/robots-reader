@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - dev
+    
+    tags:
+      - v*
   pull_request: {}
   workflow_dispatch: {}
 
@@ -27,7 +30,8 @@ jobs:
           yarn run lint
           yarn run build
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_type == 'tag')
         with:
           name: dist-${{ github.ref_name }}
@@ -74,9 +78,7 @@ jobs:
 
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          VERSION=$(echo "${{ github.ref_name }}" | tr '[A-Z]' '[a-z]')
 
           # Strip "v" prefix from tag name
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
@@ -85,7 +87,6 @@ jobs:
           [ "$VERSION" == "dev" ] && VERSION=latest
 
           echo "IMAGE_ID=$IMAGE_ID"
-          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
           echo "VERSION=$VERSION"
 
           # Register variables
@@ -95,7 +96,8 @@ jobs:
           # Docker buildx platforms
           docker buildx ls
 
-      - uses: docker/build-push-action@v3
+      - name: Build and Publish Docker image
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
