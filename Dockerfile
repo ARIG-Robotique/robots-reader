@@ -12,7 +12,10 @@ mkdir -p /logs-simulateur && ln -s /logs-simulateur logs-simulateur
 EOF
 
 WORKDIR /app
-COPY node_modules/ ./node_modules/
+COPY package.json .
+COPY yarn.lock .
+RUN yarn install --production --frozen-lockfile
 COPY dist/ .
+
 
 CMD ["node", "server.js"]

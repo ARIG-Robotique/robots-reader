@@ -95,9 +95,6 @@ jobs:
           echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-          # Docker buildx platforms
-          docker buildx ls
-
       - name: Build and Publish Docker image
         uses: docker/build-push-action@v5
         with:
