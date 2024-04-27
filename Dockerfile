@@ -14,6 +14,7 @@ EOF
 WORKDIR /app
 COPY package.json .
 COPY yarn.lock .
+COPY scripts .
 RUN yarn install --production --frozen-lockfile
 COPY dist/ .
 
