@@ -2,12 +2,16 @@ import { Cacheable } from 'typescript-cacheable';
 import { Inject, Singleton } from 'typescript-ioc';
 import { Robot } from '../models/Robot';
 import { Config } from './Config';
+import { Logger } from './Logger';
 
 @Singleton
 export class RobotService {
 
     @Inject
     private config: Config;
+
+    @Inject
+    private log: Logger;
 
     buildDir(robot: Robot): string {
         if (robot.simulateur) {
@@ -34,16 +38,27 @@ export class RobotService {
     init() {
         Robot.findAll()
             .then((robots) => {
-                const hasNerell = robots.find(r => r.name === 'Nerell' && !r.simulateur);
-                const hasNerellSimu = robots.find(r => r.name === 'Nerell' && r.simulateur);
-                //const hasOdin = robots.find(r => r.name === 'Odin' && !r.simulateur);
-                //const hasOdinSimu = robots.find(r => r.name === 'Odin' && r.simulateur);
-                const hasPamiTriangle = robots.find(r => r.name === 'Pami Triangle' && !r.simulateur);
-                const hasPamiTriangleSimu = robots.find(r => r.name === 'Pami Triangle' && r.simulateur);
-                const hasPamiCarre = robots.find(r => r.name === 'Pami Carre' && !r.simulateur);
-                const hasPamiCarreSimu = robots.find(r => r.name === 'Pami Carre' && r.simulateur);
-                const hasPamiRond = robots.find(r => r.name === 'Pami Rond' && !r.simulateur);
-                const hasPamiRondSimu = robots.find(r => r.name === 'Pami Rond' && r.simulateur);
+                const hasNerell = robots.find(r => r.name === 'Nerell' && !r.simulateur) !== undefined;
+                const hasNerellSimu = robots.find(r => r.name === 'Nerell' && r.simulateur) !== undefined;
+                const hasOdin = robots.find(r => r.name === 'Odin' && !r.simulateur) !== undefined;
+                const hasOdinSimu = robots.find(r => r.name === 'Odin' && r.simulateur) !== undefined;
+                const hasPamiTriangle = robots.find(r => r.name === 'Pami △' && !r.simulateur) !== undefined;
+                const hasPamiTriangleSimu = robots.find(r => r.name === 'Pami △' && r.simulateur) !== undefined;
+                const hasPamiCarre = robots.find(r => r.name === 'Pami ▢' && !r.simulateur) !== undefined;
+                const hasPamiCarreSimu = robots.find(r => r.name === 'Pami ▢' && r.simulateur) !== undefined;
+                const hasPamiRond = robots.find(r => r.name === 'Pami ○' && !r.simulateur) !== undefined;
+                const hasPamiRondSimu = robots.find(r => r.name === 'Pami ○' && r.simulateur) !== undefined;
+
+                this.log.info(`Nerell found             : ${hasNerell}`)
+                this.log.info(`Nerell simu found        : ${hasNerellSimu}`)
+                this.log.info(`Odin found               : ${hasOdin}`)
+                this.log.info(`Odin simu found          : ${hasOdinSimu}`)
+                this.log.info(`Pami Triangle found      : ${hasPamiTriangle}`)
+                this.log.info(`Pami Triangle simu found : ${hasPamiTriangleSimu}`)
+                this.log.info(`Pami Carre found         : ${hasPamiCarre}`)
+                this.log.info(`Pami Carre simu found    : ${hasPamiCarreSimu}`)
+                this.log.info(`Pami Rond found          : ${hasPamiRond}`)
+                this.log.info(`Pami Rond simu found     : ${hasPamiRondSimu}`)
 
                 if (!hasNerell) {
                     new Robot({
