@@ -14,9 +14,9 @@ EOF
 WORKDIR /app
 COPY package.json .
 COPY yarn.lock .
-COPY scripts .
 RUN yarn install --production --frozen-lockfile
 COPY dist/ .
+RUN chmod +x scripts/*.sh
 
 
 CMD ["node", "server.js"]
