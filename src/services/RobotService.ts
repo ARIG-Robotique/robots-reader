@@ -76,7 +76,7 @@ export class RobotService {
                 }
                 /*if (!hasOdin) {
                     new Robot({
-                        host      : 'odin:8080',
+                        host      : 'odin:8081',
                         name      : 'Odin',
                         simulateur: false,
                     }).save();
@@ -90,7 +90,7 @@ export class RobotService {
                 }*/
                 if (!hasPamiTriangle) {
                     new Robot({
-                        host      : 'pami-triangle:8080',
+                        host      : 'pami-triangle:8082',
                         name      : 'Pami △',
                         simulateur: false,
                     }).save();
@@ -104,7 +104,7 @@ export class RobotService {
                 }
                 if (!hasPamiCarre) {
                     new Robot({
-                        host      : 'pami-carre:8080',
+                        host      : 'pami-carre:8083',
                         name      : 'Pami ▢',
                         simulateur: false,
                     }).save();
@@ -118,7 +118,7 @@ export class RobotService {
                 }
                 if (!hasPamiRond) {
                     new Robot({
-                        host      : 'pami-rond:8080',
+                        host      : 'pami-rond:8084',
                         name      : 'Pami ○',
                         simulateur: false,
                     }).save();
