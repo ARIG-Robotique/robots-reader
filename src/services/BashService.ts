@@ -29,7 +29,8 @@ export class BashService {
                 this.log.info(`Copy all logs for ${robotId} ${robot.name} from ${host} to ${dir}`);
 
                 return new Promise((resolve, reject) => {
-                    const getLogs = child.spawn(this.GET_LOGS_SH, [host, robot.name.toLowerCase(), dir], {
+                    let robotName = robot.dirName !== undefined ? robot.dirName.toLowerCase() : robot.name.toLowerCase();
+                    const getLogs = child.spawn(this.GET_LOGS_SH, [host, robotName, dir], {
                         cwd: process.cwd()
                     });
 

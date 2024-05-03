@@ -14,10 +14,12 @@ export class RobotService {
     private log: Logger;
 
     buildDir(robot: Robot): string {
+        let dirName = robot.dirName !== undefined ? robot.dirName.toLowerCase() : robot.name.toLowerCase();
+
         if (robot.simulateur) {
-            return `${this.config.logsOutput}-simulateur/${robot.name.toLowerCase()}`;
+            return `${this.config.logsOutput}-simulateur/${dirName}`;
         } else {
-            return `${this.config.logsOutput}/${robot.name.toLowerCase()}`;
+            return `${this.config.logsOutput}/${dirName}`;
         }
     }
 
@@ -92,6 +94,7 @@ export class RobotService {
                     new Robot({
                         host      : 'pami-triangle:8082',
                         name      : 'Pami △',
+                        dirName   : 'pami-triangle',
                         simulateur: false,
                     }).save();
                 }
@@ -99,6 +102,7 @@ export class RobotService {
                     new Robot({
                         host      : 'localhost:8082',
                         name      : 'Pami △',
+                        dirName   : 'pami-triangle',
                         simulateur: true,
                     }).save();
                 }
@@ -106,6 +110,7 @@ export class RobotService {
                     new Robot({
                         host      : 'pami-carre:8083',
                         name      : 'Pami ▢',
+                        dirName   : 'pami-carre',
                         simulateur: false,
                     }).save();
                 }
@@ -113,6 +118,7 @@ export class RobotService {
                     new Robot({
                         host      : 'localhost:8083',
                         name      : 'Pami ▢',
+                        dirName   : 'pami-carre',
                         simulateur: true,
                     }).save();
                 }
@@ -120,6 +126,7 @@ export class RobotService {
                     new Robot({
                         host      : 'pami-rond:8084',
                         name      : 'Pami ○',
+                        dirName   : 'pami-rond',
                         simulateur: false,
                     }).save();
                 }
@@ -127,6 +134,7 @@ export class RobotService {
                     new Robot({
                         host      : 'localhost:8084',
                         name      : 'Pami ○',
+                        dirName   : 'pami-rond',
                         simulateur: true,
                     }).save();
                 }
