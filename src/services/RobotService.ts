@@ -14,7 +14,7 @@ export class RobotService {
     private log: Logger;
 
     buildDir(robot: Robot): string {
-        let dirName = robot.dirName !== undefined ? robot.dirName.toLowerCase() : robot.name.toLowerCase();
+        const dirName = robot.dirName !== undefined ? robot.dirName.toLowerCase() : robot.name.toLowerCase();
 
         if (robot.simulateur) {
             return `${this.config.logsOutput}-simulateur/${dirName}`;
