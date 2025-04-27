@@ -50,6 +50,8 @@ export class RobotService {
                 const hasPamiCarreSimu = robots.find(r => r.name === 'Pami ▢' && r.simulateur) !== undefined;
                 const hasPamiRond = robots.find(r => r.name === 'Pami ○' && !r.simulateur) !== undefined;
                 const hasPamiRondSimu = robots.find(r => r.name === 'Pami ○' && r.simulateur) !== undefined;
+                const hasPamiStar = robots.find(r => r.name === 'Pami ★' && !r.simulateur) !== undefined;
+                const hasPamiStarSimu = robots.find(r => r.name === 'Pami ★' && r.simulateur) !== undefined;
 
                 this.log.info(`Nerell found             : ${hasNerell}`)
                 this.log.info(`Nerell simu found        : ${hasNerellSimu}`)
@@ -61,6 +63,8 @@ export class RobotService {
                 this.log.info(`Pami Carre simu found    : ${hasPamiCarreSimu}`)
                 this.log.info(`Pami Rond found          : ${hasPamiRond}`)
                 this.log.info(`Pami Rond simu found     : ${hasPamiRondSimu}`)
+                this.log.info(`Pami Star found          : ${hasPamiStar}`)
+                this.log.info(`Pami Star simu found     : ${hasPamiStarSimu}`)
 
                 if (!hasNerell) {
                     new Robot({
@@ -135,6 +139,22 @@ export class RobotService {
                         host      : 'localhost:8084',
                         name      : 'Pami ○',
                         dirName   : 'pami-rond',
+                        simulateur: true,
+                    }).save();
+                }
+                if (!hasPamiStar) {
+                    new Robot({
+                        host      : 'pami-star:8085',
+                        name      : 'Pami ★',
+                        dirName   : 'pami-star',
+                        simulateur: false,
+                    }).save();
+                }
+                if (!hasPamiRondSimu) {
+                    new Robot({
+                        host      : 'localhost:8085',
+                        name      : 'Pami ★',
+                        dirName   : 'pami-star',
                         simulateur: true,
                     }).save();
                 }
