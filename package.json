@@ -18,7 +18,8 @@
     "pami-triangle-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-triangle ./logs-simulateur/pami-triangle",
     "pami-carre-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-carre ./logs-simulateur/pami-carre",
     "pami-rond-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-rond ./logs-simulateur/pami-rond",
-    "pami-simu-link": "yarn pami-triangle-simu-link && yarn pami-carre-simu-link && yarn pami-rond-simu-link",
+    "pami-star-simu-link": "ln -sfn ../../../java/robots/pami-parent/pami-simulator/logs-star ./logs-simulateur/pami-star",
+    "pami-simu-link": "yarn pami-triangle-simu-link && yarn pami-carre-simu-link && yarn pami-rond-simu-link && yarn pami-star-simu-link",
     "start": "yarn mk-folders && yarn nerell-simu-link && yarn odin-simu-link && yarn pami-simu-link && ts-node ./src/server.ts"
   },
   "dependencies": {
