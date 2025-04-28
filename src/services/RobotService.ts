@@ -72,6 +72,7 @@ export class RobotService {
                         name      : 'Nerell',
                         simulateur: false,
                     }).save();
+                    this.log.info('Nerell robot created');
                 }
                 if (!hasNerellSimu) {
                     new Robot({
@@ -79,6 +80,7 @@ export class RobotService {
                         name      : 'Nerell',
                         simulateur: true,
                     }).save();
+                    this.log.info('Nerell simu robot created');
                 }
                 /*if (!hasOdin) {
                     new Robot({
@@ -101,6 +103,7 @@ export class RobotService {
                         dirName   : 'pami-triangle',
                         simulateur: false,
                     }).save();
+                    this.log.info('Pami Triangle robot created');
                 }
                 if (!hasPamiTriangleSimu) {
                     new Robot({
@@ -109,6 +112,7 @@ export class RobotService {
                         dirName   : 'pami-triangle',
                         simulateur: true,
                     }).save();
+                    this.log.info('Pami Triangle simu robot created');
                 }
                 if (!hasPamiCarre) {
                     new Robot({
@@ -117,6 +121,7 @@ export class RobotService {
                         dirName   : 'pami-carre',
                         simulateur: false,
                     }).save();
+                    this.log.info('Pami Carre robot created');
                 }
                 if (!hasPamiCarreSimu) {
                     new Robot({
@@ -125,6 +130,7 @@ export class RobotService {
                         dirName   : 'pami-carre',
                         simulateur: true,
                     }).save();
+                    this.log.info('Pami Carre simu robot created');
                 }
                 if (!hasPamiRond) {
                     new Robot({
@@ -133,6 +139,7 @@ export class RobotService {
                         dirName   : 'pami-rond',
                         simulateur: false,
                     }).save();
+                    this.log.info('Pami Rond robot created');
                 }
                 if (!hasPamiRondSimu) {
                     new Robot({
@@ -141,6 +148,7 @@ export class RobotService {
                         dirName   : 'pami-rond',
                         simulateur: true,
                     }).save();
+                    this.log.info('Pami Rond simu robot created');
                 }
                 if (!hasPamiStar) {
                     new Robot({
@@ -149,6 +157,7 @@ export class RobotService {
                         dirName   : 'pami-star',
                         simulateur: false,
                     }).save();
+                    this.log.info('Pami Star robot created');
                 }
                 if (!hasPamiStarSimu) {
                     new Robot({
@@ -157,6 +166,7 @@ export class RobotService {
                         dirName   : 'pami-star',
                         simulateur: true,
                     }).save();
+                    this.log.info('Pami Star simu robot created');
                 }
             });
     }
