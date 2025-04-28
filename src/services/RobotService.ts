@@ -150,7 +150,7 @@ export class RobotService {
                         simulateur: false,
                     }).save();
                 }
-                if (!hasPamiRondSimu) {
+                if (!hasPamiStarSimu) {
                     new Robot({
                         host      : 'localhost:8085',
                         name      : 'Pami ★',
