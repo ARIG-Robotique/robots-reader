@@ -68,7 +68,7 @@ export class RobotService {
 
                 if (!hasNerell) {
                     new Robot({
-                        host      : 'nerell:8080',
+                        host      : 'nerell.local:8080',
                         name      : 'Nerell',
                         simulateur: false,
                     }).save();
@@ -98,7 +98,7 @@ export class RobotService {
                 }*/
                 if (!hasPamiTriangle) {
                     new Robot({
-                        host      : 'pami-triangle:8082',
+                        host      : 'pami-triangl.local:8082',
                         name      : 'Pami △',
                         dirName   : 'pami-triangle',
                         simulateur: false,
@@ -116,7 +116,7 @@ export class RobotService {
                 }
                 if (!hasPamiCarre) {
                     new Robot({
-                        host      : 'pami-carre:8083',
+                        host      : 'pami-carre.local:8083',
                         name      : 'Pami ▢',
                         dirName   : 'pami-carre',
                         simulateur: false,
@@ -134,7 +134,7 @@ export class RobotService {
                 }
                 if (!hasPamiRond) {
                     new Robot({
-                        host      : 'pami-rond:8084',
+                        host      : 'pami-rond.local:8084',
                         name      : 'Pami ○',
                         dirName   : 'pami-rond',
                         simulateur: false,
@@ -152,7 +152,7 @@ export class RobotService {
                 }
                 if (!hasPamiStar) {
                     new Robot({
-                        host      : 'pami-star:8085',
+                        host      : 'pami-star.local:8085',
                         name      : 'Pami ★',
                         dirName   : 'pami-star',
                         simulateur: false,
