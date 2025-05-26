@@ -98,7 +98,7 @@ export class RobotService {
                 }*/
                 if (!hasPamiTriangle) {
                     new Robot({
-                        host      : 'pami-triangl.local:8082',
+                        host      : 'pami-triangle.local:8082',
                         name      : 'Pami △',
                         dirName   : 'pami-triangle',
                         simulateur: false,
