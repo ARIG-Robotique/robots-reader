@@ -32,7 +32,7 @@
     "@influxdata/influxdb-client": "^1.33.2",
     "@influxdata/influxdb-client-apis": "^1.33.2",
     "last-line": "0.0.3",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "log4js": "^6.4.4",
     "pg": "^8.3.0",
     "queue-promise": "^2.2.1",
